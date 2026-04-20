@@ -3,401 +3,231 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>📚 Admin Perpustakaan | Manajemen Buku + Peminjaman + Denda</title>
-  <!-- Google Fonts + Font Awesome 6 -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <title>📚 PustakaKita | Admin & Anggota Perpustakaan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Flatpickr untuk date picker -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
     body {
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       min-height: 100vh;
-      padding: 2rem 1.5rem;
+      padding: 1rem;
     }
-
-    .app-container {
-      max-width: 1400px;
-      margin: 0 auto;
+    /* Auth Container */
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-
-    /* Header */
-    .admin-header {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(12px);
+    .auth-card {
+      background: rgba(255,255,255,0.95);
       border-radius: 2rem;
-      padding: 1.2rem 2rem;
-      margin-bottom: 2rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.3);
+    }
+    .auth-card h2 { text-align: center; margin-bottom: 1rem; color: #1e3c72; }
+    .role-tabs {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      border: 1px solid rgba(255,255,255,0.2);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
-    .logo h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      background: linear-gradient(120deg, #fff, #ffd89b);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .logo p {
-      color: #cbd5e6;
-      font-size: 0.8rem;
-    }
-    .stats {
-      background: rgba(0,0,0,0.4);
-      padding: 0.5rem 1.2rem;
-      border-radius: 40px;
-      color: white;
-      font-weight: 500;
-    }
-
-    /* Tab Navigation */
-    .tabs {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-    }
-    .tab-btn {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      padding: 0.8rem 1.8rem;
-      border-radius: 40px;
-      font-weight: 600;
-      color: #e2e8f0;
-      cursor: pointer;
-      transition: 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      backdrop-filter: blur(4px);
-    }
-    .tab-btn.active {
-      background: #ffb347;
-      color: #1e2a3a;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    .tab-btn:hover:not(.active) {
-      background: rgba(255,255,255,0.25);
-    }
-
-    /* Panel */
-    .panel {
-      display: none;
-      animation: fade 0.2s ease;
-    }
-    .panel.active-panel {
-      display: block;
-    }
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(8px);}
-      to { opacity: 1; transform: translateY(0);}
-    }
-
-    /* Toolbar */
-    .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
-    .search-box {
-      background: white;
-      border-radius: 60px;
-      display: flex;
-      align-items: center;
-      padding: 0.3rem 0.3rem 0.3rem 1.2rem;
-      flex: 2;
-      min-width: 200px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .search-box input {
+    .role-tab {
       flex: 1;
-      border: none;
-      padding: 0.7rem 0;
-      outline: none;
-      background: transparent;
-    }
-    .search-box button {
-      background: #2c3e66;
-      border: none;
-      color: white;
-      border-radius: 40px;
-      padding: 0.5rem 1.2rem;
+      text-align: center;
+      padding: 0.5rem;
+      background: #e2e8f0;
+      border-radius: 2rem;
       cursor: pointer;
+      font-weight: 600;
     }
-    .btn-primary {
+    .role-tab.active {
+      background: #ff8c00;
+      color: white;
+    }
+    .auth-card input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 1rem;
+    }
+    .auth-card button {
+      width: 100%;
+      padding: 0.8rem;
       background: linear-gradient(95deg, #ffb347, #ff8c00);
       border: none;
-      padding: 0.7rem 1.5rem;
-      border-radius: 40px;
-      font-weight: 600;
-      color: #1e2a3a;
+      border-radius: 2rem;
+      font-weight: bold;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: 0.2s;
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.05);
-    }
-    .btn-secondary {
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.4);
       color: white;
     }
-
-    /* Grid buku */
-    .books-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-    .book-card {
-      background: rgba(255,255,255,0.95);
-      border-radius: 1.5rem;
-      overflow: hidden;
-      transition: 0.2s;
-      box-shadow: 0 12px 24px -12px black;
-    }
-    .book-card:hover {
-      transform: translateY(-5px);
-    }
-    .book-cover {
-      background: #eef2f5;
+    .back-to-login {
       text-align: center;
-      padding: 1.2rem;
-      font-size: 2.5rem;
+      margin-top: 1rem;
+      cursor: pointer;
       color: #ff8c00;
+      font-weight: bold;
     }
-    .book-details {
-      padding: 1rem;
+    .error-msg { color: red; text-align: center; margin-top: 0.5rem; font-size: 0.8rem; }
+
+    /* Dashboard Admin & Anggota (gabungan) */
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+      border-radius: 2rem;
+      padding: 1.5rem;
     }
-    .book-title {
-      font-weight: 800;
-      font-size: 1.2rem;
-    }
-    .status-badge {
-      display: inline-block;
-      font-size: 0.7rem;
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-      margin-left: 0.5rem;
-    }
-    .available {
-      background: #c8f0d1;
-      color: #1f6e3a;
-    }
-    .borrowed {
-      background: #ffe0d4;
-      color: #b4512c;
-    }
-    .card-actions {
+    .header {
       display: flex;
-      gap: 8px;
-      padding: 0.8rem 1rem 1rem;
-      border-top: 1px solid #eef2f5;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.3);
+      padding: 1rem 1.5rem;
+      border-radius: 1.5rem;
+      margin-bottom: 2rem;
+      color: white;
+      flex-wrap: wrap;
     }
-    .card-actions button {
-      flex: 1;
+    .logout-btn, .back-btn {
+      background: #dc2626;
       border: none;
-      padding: 0.4rem;
-      border-radius: 30px;
-      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      color: white;
       cursor: pointer;
     }
-
-    /* Tabel peminjaman */
-    .loans-table-container {
-      background: rgba(255,255,255,0.95);
+    .back-btn { background: #475569; margin-right: 0.5rem; }
+    .menu-grid {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .menu-card {
+      background: white;
       border-radius: 1.5rem;
       padding: 1rem;
-      overflow-x: auto;
+      text-align: center;
+      width: 160px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .menu-card i { font-size: 2rem; color: #ff8c00; }
+    .menu-card.active { background: #ff8c00; color: white; }
+    .menu-card.active i { color: white; }
+    .content-panel {
+      background: rgba(255,255,255,0.95);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      min-height: 500px;
+    }
+    .panel { display: none; }
+    .panel.active-panel { display: block; }
+    .btn-primary {
+      background: #ff8c00;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      color: white;
+      cursor: pointer;
     }
     table {
       width: 100%;
       border-collapse: collapse;
     }
     th, td {
-      padding: 1rem 0.8rem;
+      padding: 0.75rem;
       text-align: left;
       border-bottom: 1px solid #e2e8f0;
     }
-    th {
-      background: #f8fafc;
-      color: #1e293b;
-    }
-    .fine-badge {
-      background: #fee2e2;
-      color: #b91c1c;
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-      font-weight: 600;
-    }
-    .btn-return {
-      background: #ffedea;
-      border: none;
-      padding: 0.4rem 1rem;
-      border-radius: 30px;
-      cursor: pointer;
-      font-weight: 600;
-    }
+    .fine-badge { background: #fee2e2; color: #b91c1c; padding: 0.2rem 0.5rem; border-radius: 1rem; }
     .modal {
+      display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(4px);
-      display: flex;
       align-items: center;
       justify-content: center;
-      visibility: hidden;
-      opacity: 0;
-      transition: 0.2s;
       z-index: 1000;
-    }
-    .modal.active {
-      visibility: visible;
-      opacity: 1;
     }
     .modal-content {
       background: white;
-      max-width: 500px;
-      width: 90%;
       border-radius: 2rem;
-      padding: 1.8rem;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 450px;
     }
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    .form-group label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 0.3rem;
-    }
-    .form-group input, .form-group select {
+    .modal-content input, .modal-content select {
       width: 100%;
-      padding: 0.7rem;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
       border-radius: 1rem;
       border: 1px solid #ccc;
     }
-    .modal-buttons {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-    footer {
-      text-align: center;
-      margin-top: 2rem;
-      color: #a0b8d0;
-    }
     @media (max-width: 700px) {
-      body { padding: 1rem; }
-      th, td { font-size: 0.8rem; padding: 0.6rem; }
+      .menu-card { width: 120px; font-size: 0.8rem; }
+      th, td { font-size: 0.7rem; }
     }
   </style>
 </head>
 <body>
-<div class="app-container">
-  <div class="admin-header">
-    <div class="logo">
-      <h1><i class="fas fa-landmark"></i> Admin Perpustakaan</h1>
-      <p>Manajemen Buku + Peminjaman & Denda Otomatis</p>
+<!-- Auth Container -->
+<div id="authContainer" class="auth-container">
+  <div class="auth-card">
+    <h2>📚 Perpustakaan Digital</h2>
+    <div class="role-tabs">
+      <div class="role-tab active" data-role="admin">Admin</div>
+      <div class="role-tab" data-role="anggota">Anggota</div>
     </div>
-    <div class="stats" id="globalStats">
-      <i class="fas fa-chart-line"></i> <span id="statsTotalBooks">0</span> Buku | 
-      <span id="statsLoansActive">0</span> Dipinjam
-    </div>
+    <input type="text" id="loginUsername" placeholder="Username">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button id="authSubmitBtn">Login</button>
+    <div id="authError" class="error-msg"></div>
   </div>
+</div>
 
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="booksTab"><i class="fas fa-book"></i> Katalog Buku</button>
-    <button class="tab-btn" data-tab="loansTab"><i class="fas fa-hand-holding-heart"></i> Peminjaman & Denda</button>
-  </div>
-
-  <!-- Panel Buku -->
-  <div id="booksPanel" class="panel active-panel">
-    <div class="toolbar">
-      <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" id="searchBookInput" placeholder="Cari judul / penulis...">
-        <button id="resetBookSearch"><i class="fas fa-times"></i> Reset</button>
-      </div>
-      <button id="openAddBookModal" class="btn-primary"><i class="fas fa-plus-circle"></i> Tambah Buku</button>
-    </div>
-    <div id="booksGridContainer" class="books-grid">
-      <div class="loading-spinner">Memuat data buku...</div>
-    </div>
-  </div>
-
-  <!-- Panel Peminjaman -->
-  <div id="loansPanel" class="panel">
-    <div class="toolbar">
-      <button id="openBorrowModalBtn" class="btn-primary"><i class="fas fa-user-plus"></i> + Peminjaman Baru</button>
-      <div class="search-box" style="max-width: 300px;">
-        <input type="text" id="searchLoanInput" placeholder="Cari peminjam / buku...">
+<!-- Dashboard Container (akan diisi sesuai role) -->
+<div id="dashboardContainer" style="display: none;">
+  <div class="dashboard-container">
+    <div class="header">
+      <div><i class="fas fa-user-circle"></i> <span id="userNameDisplay"></span> (<span id="userRoleDisplay"></span>)</div>
+      <div>
+        <button class="back-btn" id="backToLoginBtn"><i class="fas fa-arrow-left"></i> Kembali ke Login</button>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </div>
     </div>
-    <div class="loans-table-container">
-      <table id="loansTable">
-        <thead>
-          <tr><th>Buku</th><th>Peminjam</th><th>Tgl Pinjam</th><th>Jatuh Tempo</th><th>Status</th><th>Denda</th><th>Aksi</th></tr>
-        </thead>
-        <tbody id="loansTableBody">
-          <tr><td colspan="7">Memuat data peminjaman...</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- Menu Dinamis (akan diisi JS) -->
+    <div id="menuContainer" class="menu-grid"></div>
+    <!-- Konten Dinamis -->
+    <div class="content-panel" id="contentPanel"></div>
   </div>
+</div>
 
-  <!-- Modal Tambah/Edit Buku -->
-  <div id="bookModal" class="modal">
-    <div class="modal-content">
-      <h3 id="bookModalTitle">Tambah Buku</h3>
-      <div class="form-group"><label>Judul</label><input id="bookTitle" placeholder="Judul buku"></div>
-      <div class="form-group"><label>Penulis</label><input id="bookAuthor" placeholder="Penulis"></div>
-      <div class="form-group"><label>Tahun</label><input id="bookYear" placeholder="Tahun" type="number"></div>
-      <div class="modal-buttons"><button id="saveBookBtn" class="btn-primary">Simpan</button><button id="closeBookModal" class="btn-secondary" style="background:#ccc;">Batal</button></div>
-    </div>
-  </div>
-
-  <!-- Modal Peminjaman Baru -->
-  <div id="borrowModal" class="modal">
-    <div class="modal-content">
-      <h3><i class="fas fa-book-open"></i> Form Peminjaman</h3>
-      <div class="form-group"><label>Pilih Buku</label><select id="bookSelect"></select></div>
-      <div class="form-group"><label>Nama Peminjam</label><input id="borrowerName" placeholder="Nama lengkap"></div>
-      <div class="form-group"><label>Tanggal Pinjam</label><input type="text" id="borrowDate" placeholder="Pilih tanggal"></div>
-      <div class="form-group"><label>Tanggal Jatuh Tempo (rencana kembali)</label><input type="text" id="dueDate"></div>
-      <div class="modal-buttons"><button id="confirmBorrowBtn" class="btn-primary">Pinjam Buku</button><button id="closeBorrowModal" class="btn-secondary">Batal</button></div>
+<!-- Modal Umum untuk CRUD -->
+<div id="genericModal" class="modal">
+  <div class="modal-content">
+    <h3 id="modalTitle">Form</h3>
+    <div id="modalBody"></div>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+      <button id="modalSaveBtn" class="btn-primary">Simpan</button>
+      <button id="modalCloseBtn" style="background:#ccc; border:none; padding:0.5rem; border-radius:2rem;">Batal</button>
     </div>
   </div>
 </div>
-<footer><i class="fas fa-database"></i> Terintegrasi Firebase | Denda keterlambatan: Rp10.000 (flat)</footer>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, getDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, query, where, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCfqZD7UZZt-GWmtNhfJyksrv3-8ENRjto",
@@ -410,312 +240,478 @@
   };
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
   const booksCol = collection(db, "books");
   const loansCol = collection(db, "borrowings");
+  const usersCol = collection(db, "users");
 
-  // State
-  let books = [];          // semua buku dari firestore
-  let loans = [];          // semua peminjaman
-  let currentEditId = null;
-  let bookSearchTerm = "";
-  let loanSearchTerm = "";
+  let currentUser = null;
+  let currentRole = null; // "admin" atau "anggota"
+  let currentUserData = null;
+  let books = [];
+  let loans = [];
+  let members = []; // daftar anggota (role = anggota)
 
-  // DOM Elements
-  const booksGridDiv = document.getElementById("booksGridContainer");
-  const loansTableBody = document.getElementById("loansTableBody");
-  const searchBookInput = document.getElementById("searchBookInput");
-  const resetBookSearch = document.getElementById("resetBookSearch");
-  const openAddBookModal = document.getElementById("openAddBookModal");
-  const bookModal = document.getElementById("bookModal");
-  const saveBookBtn = document.getElementById("saveBookBtn");
-  const closeBookModal = document.getElementById("closeBookModal");
-  const bookTitle = document.getElementById("bookTitle");
-  const bookAuthor = document.getElementById("bookAuthor");
-  const bookYear = document.getElementById("bookYear");
-  const bookModalTitle = document.getElementById("bookModalTitle");
-  const openBorrowModalBtn = document.getElementById("openBorrowModalBtn");
-  const borrowModal = document.getElementById("borrowModal");
-  const closeBorrowModal = document.getElementById("closeBorrowModal");
-  const confirmBorrowBtn = document.getElementById("confirmBorrowBtn");
-  const bookSelect = document.getElementById("bookSelect");
-  const borrowerName = document.getElementById("borrowerName");
-  const borrowDateInput = document.getElementById("borrowDate");
-  const dueDateInput = document.getElementById("dueDate");
-  const searchLoanInput = document.getElementById("searchLoanInput");
-  const statsTotalBooks = document.getElementById("statsTotalBooks");
-  const statsLoansActive = document.getElementById("statsLoansActive");
+  // DOM
+  const authContainer = document.getElementById("authContainer");
+  const dashboardContainer = document.getElementById("dashboardContainer");
+  const loginUsername = document.getElementById("loginUsername");
+  const loginPassword = document.getElementById("loginPassword");
+  const authSubmitBtn = document.getElementById("authSubmitBtn");
+  const authError = document.getElementById("authError");
+  const userNameDisplay = document.getElementById("userNameDisplay");
+  const userRoleDisplay = document.getElementById("userRoleDisplay");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const backToLoginBtn = document.getElementById("backToLoginBtn");
+  const menuContainer = document.getElementById("menuContainer");
+  const contentPanel = document.getElementById("contentPanel");
+  const genericModal = document.getElementById("genericModal");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalBody = document.getElementById("modalBody");
+  const modalSaveBtn = document.getElementById("modalSaveBtn");
+  const modalCloseBtn = document.getElementById("modalCloseBtn");
 
-  // Flatpickr initialization
-  flatpickr(borrowDateInput, { dateFormat: "Y-m-d", defaultDate: new Date() });
-  flatpickr(dueDateInput, { dateFormat: "Y-m-d", defaultDate: new Date(Date.now() + 7*86400000) });
-
-  // Helper: Render Buku
-  function renderBooks() {
-    let filtered = books.filter(b => b.title.toLowerCase().includes(bookSearchTerm) || b.author.toLowerCase().includes(bookSearchTerm));
-    statsTotalBooks.innerText = books.length;
-    if (filtered.length === 0) {
-      booksGridDiv.innerHTML = `<div class="empty-message">📭 Tidak ada buku ditemukan.</div>`;
-      return;
-    }
-    let html = "";
-    filtered.forEach(book => {
-      const isAvailable = book.isAvailable !== false;
-      const statusClass = isAvailable ? "available" : "borrowed";
-      const statusText = isAvailable ? "Tersedia" : "Dipinjam";
-      html += `
-        <div class="book-card">
-          <div class="book-cover"><i class="fas fa-book"></i></div>
-          <div class="book-details">
-            <div class="book-title">${escapeHtml(book.title)} <span class="status-badge ${statusClass}">${statusText}</span></div>
-            <div>${escapeHtml(book.author)} (${book.year})</div>
-          </div>
-          <div class="card-actions">
-            <button class="edit-book-btn" data-id="${book.id}" style="background:#eef2ff;">✏️ Edit</button>
-            <button class="delete-book-btn" data-id="${book.id}" style="background:#ffe0dd;">🗑 Hapus</button>
-          </div>
-        </div>
-      `;
-    });
-    booksGridDiv.innerHTML = html;
-    // attach event after render
-    document.querySelectorAll(".edit-book-btn").forEach(btn => {
-      btn.addEventListener("click", async (e) => {
-        const id = btn.dataset.id;
-        const book = books.find(b => b.id === id);
-        if (book) openEditBookModal(book);
-      });
-    });
-    document.querySelectorAll(".delete-book-btn").forEach(btn => {
-      btn.addEventListener("click", async (e) => {
-        if (confirm("Hapus buku permanen?")) {
-          await deleteDoc(doc(db, "books", btn.dataset.id));
-        }
-      });
-    });
-  }
-
-  // Render Loans (Peminjaman)
-  async function renderLoans() {
-    // ambil loans dari state + hitung denda jika terlambat dan belum dikembalikan
-    let filtered = loans.filter(l => 
-      l.borrowerName.toLowerCase().includes(loanSearchTerm) || 
-      (l.bookTitle || "").toLowerCase().includes(loanSearchTerm)
-    );
-    const activeLoansCount = loans.filter(l => !l.returnDate).length;
-    statsLoansActive.innerText = activeLoansCount;
-    if (filtered.length === 0) {
-      loansTableBody.innerHTML = `<tr><td colspan="7">Tidak ada data peminjaman.</td></tr>`;
-      return;
-    }
-    let rows = "";
-    for (let loan of filtered) {
-      const isReturned = !!loan.returnDate;
-      let status = isReturned ? "Dikembalikan" : "Dipinjam";
-      let fineDisplay = "-";
-      let fineAmount = 0;
-      if (!isReturned) {
-        // hitung denda jika melebihi dueDate (hari ini > dueDate)
-        const today = new Date();
-        const due = new Date(loan.dueDate);
-        if (today > due) fineAmount = 10000; // flat denda 10rb jika terlambat
-        if (fineAmount > 0) fineDisplay = `<span class="fine-badge">Rp ${fineAmount.toLocaleString()}</span> (belum dibayar)`;
-        else fineDisplay = "Tepat waktu";
-      } else {
-        if (loan.fine && loan.fine > 0) fineDisplay = `<span class="fine-badge">Rp ${loan.fine.toLocaleString()}</span> (lunas)`;
-        else fineDisplay = "-";
-      }
-      rows += `
-        <tr>
-          <td>${escapeHtml(loan.bookTitle || "Tidak diketahui")}</td>
-          <td>${escapeHtml(loan.borrowerName)}</td>
-          <td>${loan.borrowDate}</td>
-          <td>${loan.dueDate}</td>
-          <td>${status}</td>
-          <td>${fineDisplay}</td>
-          <td>${!isReturned ? `<button class="return-book-btn" data-id="${loan.id}" data-bookid="${loan.bookId}">📖 Kembalikan</button>` : '-'}</td>
-        </tr>
-      `;
-    }
-    loansTableBody.innerHTML = rows;
-    // attach return event
-    document.querySelectorAll(".return-book-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const loanId = btn.dataset.id;
-        const bookId = btn.dataset.bookid;
-        await returnBook(loanId, bookId);
-      });
-    });
-  }
-
-  async function returnBook(loanId, bookId) {
-    const loanDoc = await getDoc(doc(db, "borrowings", loanId));
-    if (!loanDoc.exists()) return;
-    const loanData = loanDoc.data();
-    if (loanData.returnDate) {
-      alert("Buku sudah dikembalikan.");
-      return;
-    }
-    const due = new Date(loanData.dueDate);
-    const today = new Date();
-    let fine = 0;
-    if (today > due) fine = 10000; // flat denda 10000
-    const confirmMsg = fine > 0 ? `Buku terlambat! Denda Rp10.000. Lanjutkan pengembalian?` : `Konfirmasi pengembalian buku.`;
-    if (!confirm(confirmMsg)) return;
-    // Update loan
-    await updateDoc(doc(db, "borrowings", loanId), {
-      returnDate: new Date().toISOString().split('T')[0],
-      fine: fine,
-      status: "returned"
-    });
-    // Update book availability
-    await updateDoc(doc(db, "books", bookId), { isAvailable: true, borrowerName: "" });
-    alert(fine > 0 ? `Buku dikembalikan dengan denda Rp10.000` : "Buku berhasil dikembalikan.");
-  }
-
-  async function createBorrow(bookId, borrower, borrowDate, dueDate) {
-    const bookRef = doc(db, "books", bookId);
-    const bookSnap = await getDoc(bookRef);
-    if (!bookSnap.exists()) throw new Error("Buku tidak ada");
-    const bookData = bookSnap.data();
-    if (bookData.isAvailable === false) throw new Error("Buku sedang dipinjam");
-    // add loan
-    await addDoc(loansCol, {
-      bookId: bookId,
-      bookTitle: bookData.title,
-      borrowerName: borrower,
-      borrowDate: borrowDate,
-      dueDate: dueDate,
-      returnDate: null,
-      fine: 0,
-      status: "borrowed",
-      createdAt: new Date()
-    });
-    // update book
-    await updateDoc(bookRef, { isAvailable: false, borrowerName: borrower });
-  }
-
-  function openEditBookModal(book) {
-    currentEditId = book.id;
-    bookModalTitle.innerText = "Edit Buku";
-    bookTitle.value = book.title;
-    bookAuthor.value = book.author;
-    bookYear.value = book.year;
-    bookModal.classList.add("active");
-  }
-
-  function closeAllModals() {
-    bookModal.classList.remove("active");
-    borrowModal.classList.remove("active");
-    currentEditId = null;
-    bookTitle.value = "";
-    bookAuthor.value = "";
-    bookYear.value = "";
-  }
-
-  // Real-time subscriptions
-  function subscribeBooks() {
-    onSnapshot(query(booksCol, orderBy("title")), (snapshot) => {
-      books = [];
-      snapshot.forEach(doc => {
-        books.push({ id: doc.id, ...doc.data() });
-      });
-      renderBooks();
-      updateBookSelect(); // update dropdown peminjaman
-    });
-  }
-
-  function subscribeLoans() {
-    onSnapshot(query(loansCol, orderBy("borrowDate", "desc")), (snapshot) => {
-      loans = [];
-      snapshot.forEach(doc => {
-        loans.push({ id: doc.id, ...doc.data() });
-      });
-      renderLoans();
-    });
-  }
-
-  function updateBookSelect() {
-    const availableBooks = books.filter(b => b.isAvailable !== false);
-    bookSelect.innerHTML = '<option value="">-- Pilih Buku --</option>' + availableBooks.map(b => `<option value="${b.id}">${escapeHtml(b.title)} - ${escapeHtml(b.author)}</option>`).join('');
-  }
-
-  // Save book (add / edit)
-  async function saveBook() {
-    const title = bookTitle.value.trim();
-    const author = bookAuthor.value.trim();
-    const year = parseInt(bookYear.value);
-    if (!title || !author || !year) return alert("Isi semua field");
-    if (currentEditId) {
-      await updateDoc(doc(db, "books", currentEditId), { title, author, year });
-    } else {
-      await addDoc(booksCol, { title, author, year, isAvailable: true, borrowerName: "" });
-    }
-    closeAllModals();
-  }
-
-  // Event listeners
-  openAddBookModal.addEventListener("click", () => {
-    currentEditId = null;
-    bookModalTitle.innerText = "Tambah Buku";
-    bookTitle.value = "";
-    bookAuthor.value = "";
-    bookYear.value = "";
-    bookModal.classList.add("active");
-  });
-  saveBookBtn.addEventListener("click", saveBook);
-  closeBookModal.addEventListener("click", closeAllModals);
-  resetBookSearch.addEventListener("click", () => { bookSearchTerm = ""; searchBookInput.value = ""; renderBooks(); });
-  searchBookInput.addEventListener("input", (e) => { bookSearchTerm = e.target.value.toLowerCase(); renderBooks(); });
-  searchLoanInput.addEventListener("input", (e) => { loanSearchTerm = e.target.value.toLowerCase(); renderLoans(); });
-
-  // Borrow modal
-  openBorrowModalBtn.addEventListener("click", () => {
-    if (books.filter(b => b.isAvailable !== false).length === 0) {
-      alert("Tidak ada buku tersedia untuk dipinjam.");
-      return;
-    }
-    updateBookSelect();
-    borrowerName.value = "";
-    borrowDateInput.value = new Date().toISOString().split('T')[0];
-    dueDateInput.value = new Date(Date.now() + 7*86400000).toISOString().split('T')[0];
-    borrowModal.classList.add("active");
-  });
-  closeBorrowModal.addEventListener("click", () => borrowModal.classList.remove("active"));
-  confirmBorrowBtn.addEventListener("click", async () => {
-    const bookId = bookSelect.value;
-    const borrower = borrowerName.value.trim();
-    const borrowDate = borrowDateInput.value;
-    const dueDate = dueDateInput.value;
-    if (!bookId || !borrower || !borrowDate || !dueDate) return alert("Lengkapi data peminjaman!");
-    try {
-      await createBorrow(bookId, borrower, borrowDate, dueDate);
-      alert("Buku berhasil dipinjam!");
-      borrowModal.classList.remove("active");
-    } catch (err) {
-      alert("Gagal meminjam: " + err.message);
-    }
-  });
-
-  // Tab switching
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      const tabId = btn.dataset.tab;
-      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active-panel"));
-      if (tabId === "booksTab") document.getElementById("booksPanel").classList.add("active-panel");
-      else document.getElementById("loansPanel").classList.add("active-panel");
-    });
-  });
+  let selectedRoleTab = "admin"; // default tab login
+  let currentMenu = "";
 
   // Helper
   function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
 
-  // Init
-  subscribeBooks();
-  subscribeLoans();
-  // close modals on overlay click
-  window.onclick = (e) => { if (e.target === bookModal) closeAllModals(); if (e.target === borrowModal) borrowModal.classList.remove("active"); };
+  // --- LOGIN dengan username & role ---
+  async function loginWithUsername(username, password, role) {
+    // cari user di Firestore berdasarkan username dan role
+    const q = query(usersCol, where("username", "==", username), where("role", "==", role));
+    const snap = await getDocs(q);
+    if (snap.empty) throw new Error("Username atau role tidak ditemukan");
+    const userDoc = snap.docs[0];
+    const email = userDoc.data().email;
+    await signInWithEmailAndPassword(auth, email, password);
+    return userDoc.data();
+  }
+
+  // Registrasi otomatis untuk admin pertama kali (jika belum ada)
+  async function ensureAdminExists() {
+    const adminQuery = query(usersCol, where("role", "==", "admin"));
+    const adminSnap = await getDocs(adminQuery);
+    if (adminSnap.empty) {
+      // buat admin default: username admin, password admin123
+      const adminEmail = "admin@pustakalokal.id";
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, adminEmail, "admin123");
+        await setDoc(doc(db, "users", userCred.user.uid), {
+          username: "admin",
+          email: adminEmail,
+          role: "admin",
+          fullname: "Administrator"
+        });
+        console.log("Admin default dibuat: username admin, password admin123");
+      } catch(e) { console.log("Admin mungkin sudah ada"); }
+    }
+  }
+
+  // --- RENDER DASHBOARD ADMIN ---
+  function renderAdminDashboard() {
+    const menus = [
+      { id: "manageBooks", label: "📚 Kelola Buku", icon: "fas fa-book" },
+      { id: "manageTransactions", label: "📋 Kelola Transaksi", icon: "fas fa-exchange-alt" },
+      { id: "manageMembers", label: "👥 Kelola Anggota", icon: "fas fa-users" }
+    ];
+    menuContainer.innerHTML = menus.map(m => `<div class="menu-card" data-menu="${m.id}"><i class="${m.icon}"></i><h4>${m.label}</h4></div>`).join('');
+    document.querySelectorAll(".menu-card").forEach(card => {
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".menu-card").forEach(c => c.classList.remove("active"));
+        card.classList.add("active");
+        currentMenu = card.dataset.menu;
+        if (currentMenu === "manageBooks") renderManageBooks();
+        else if (currentMenu === "manageTransactions") renderManageTransactions();
+        else if (currentMenu === "manageMembers") renderManageMembers();
+      });
+    });
+    // default buka kelola buku
+    document.querySelector(".menu-card").click();
+  }
+
+  // Kelola Buku (CRUD)
+  async function renderManageBooks() {
+    contentPanel.innerHTML = `<div><button class="btn-primary" id="addBookBtn">+ Tambah Buku</button><div id="booksListAdmin"></div></div>`;
+    const booksDiv = document.getElementById("booksListAdmin");
+    const unsubscribe = onSnapshot(query(booksCol, orderBy("title")), (snap) => {
+      books = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      booksDiv.innerHTML = `
+        <table style="margin-top:1rem">
+          <thead><tr><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody>
+            ${books.map(book => `
+              <tr>
+                <td>${escapeHtml(book.title)}</td>
+                <td>${escapeHtml(book.author)}</td>
+                <td>${book.year}</td>
+                <td>${book.isAvailable ? 'Tersedia' : 'Dipinjam'}</td>
+                <td><button class="editBookBtn" data-id="${book.id}">Edit</button> <button class="deleteBookBtn" data-id="${book.id}">Hapus</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      document.querySelectorAll(".editBookBtn").forEach(btn => btn.addEventListener("click", () => openBookModal(btn.dataset.id)));
+      document.querySelectorAll(".deleteBookBtn").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Hapus buku?")) await deleteDoc(doc(db, "books", btn.dataset.id)); }));
+    });
+    document.getElementById("addBookBtn").onclick = () => openBookModal(null);
+    return unsubscribe;
+  }
+
+  function openBookModal(bookId) {
+    const book = bookId ? books.find(b => b.id === bookId) : null;
+    modalTitle.innerText = book ? "Edit Buku" : "Tambah Buku";
+    modalBody.innerHTML = `
+      <input id="bookTitle" placeholder="Judul" value="${book ? escapeHtml(book.title) : ''}">
+      <input id="bookAuthor" placeholder="Penulis" value="${book ? escapeHtml(book.author) : ''}">
+      <input id="bookYear" placeholder="Tahun" value="${book ? book.year : ''}">
+    `;
+    genericModal.style.display = "flex";
+    const saveHandler = async () => {
+      const title = document.getElementById("bookTitle").value.trim();
+      const author = document.getElementById("bookAuthor").value.trim();
+      const year = parseInt(document.getElementById("bookYear").value);
+      if (!title || !author || !year) return alert("Isi semua data");
+      if (bookId) {
+        await updateDoc(doc(db, "books", bookId), { title, author, year });
+      } else {
+        await addDoc(booksCol, { title, author, year, isAvailable: true, borrowerName: "" });
+      }
+      genericModal.style.display = "none";
+    };
+    modalSaveBtn.onclick = saveHandler;
+    modalCloseBtn.onclick = () => genericModal.style.display = "none";
+  }
+
+  // Kelola Transaksi (CRUD peminjaman)
+  async function renderManageTransactions() {
+    contentPanel.innerHTML = `<div><button class="btn-primary" id="addTransactionBtn">+ Pinjam Buku (Manual)</button><input type="text" id="searchTrans" placeholder="Cari peminjam/buku" style="margin-left:1rem; padding:0.3rem;"><div id="transactionsList"></div></div>`;
+    const transDiv = document.getElementById("transactionsList");
+    const searchInput = document.getElementById("searchTrans");
+    const unsubscribe = onSnapshot(query(loansCol, orderBy("borrowDate", "desc")), async (snap) => {
+      loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      let filtered = loans;
+      if (searchInput) {
+        const term = searchInput.value.toLowerCase();
+        filtered = loans.filter(l => l.borrowerName.toLowerCase().includes(term) || (l.bookTitle || "").toLowerCase().includes(term));
+      }
+      transDiv.innerHTML = `
+        <table style="margin-top:1rem">
+          <thead><tr><th>Buku</th><th>Peminjam</th><th>Tgl Pinjam</th><th>Jatuh Tempo</th><th>Status</th><th>Denda</th><th>Aksi</th></tr></thead>
+          <tbody>
+            ${filtered.map(loan => {
+              const isReturned = !!loan.returnDate;
+              let fineDisplay = "-";
+              if (!isReturned) {
+                const today = new Date();
+                const due = new Date(loan.dueDate);
+                if (today > due) fineDisplay = "<span class='fine-badge'>Rp10.000 (terlambat)</span>";
+              } else if (loan.fine) fineDisplay = `<span class='fine-badge'>Rp${loan.fine}</span>`;
+              return `
+                <tr>
+                  <td>${escapeHtml(loan.bookTitle)}</td>
+                  <td>${escapeHtml(loan.borrowerName)}</td>
+                  <td>${loan.borrowDate}</td>
+                  <td>${loan.dueDate}</td>
+                  <td>${isReturned ? "Dikembalikan" : "Dipinjam"}</td>
+                  <td>${fineDisplay}</td>
+                  <td>
+                    ${!isReturned ? `<button class="returnTransBtn" data-id="${loan.id}" data-bookid="${loan.bookId}">Kembalikan</button>` : ''}
+                    <button class="deleteTransBtn" data-id="${loan.id}">Hapus</button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+      document.querySelectorAll(".returnTransBtn").forEach(btn => btn.addEventListener("click", async () => {
+        await returnBook(btn.dataset.id, btn.dataset.bookid);
+      }));
+      document.querySelectorAll(".deleteTransBtn").forEach(btn => btn.addEventListener("click", async () => {
+        if(confirm("Hapus transaksi ini?")) await deleteDoc(doc(db, "borrowings", btn.dataset.id));
+      }));
+    });
+    if (searchInput) searchInput.addEventListener("input", () => {});
+    document.getElementById("addTransactionBtn").onclick = () => openManualBorrowModal();
+  }
+
+  async function returnBook(loanId, bookId) {
+    const loanRef = doc(db, "borrowings", loanId);
+    const loanSnap = await getDoc(loanRef);
+    if (!loanSnap.exists()) return;
+    const loan = loanSnap.data();
+    if (loan.returnDate) return alert("Sudah dikembalikan");
+    const due = new Date(loan.dueDate);
+    const today = new Date();
+    let fine = today > due ? 10000 : 0;
+    if (confirm(fine ? `Terlambat! Denda Rp10.000. Lanjutkan?` : "Kembalikan buku?")) {
+      await updateDoc(loanRef, { returnDate: new Date().toISOString().split('T')[0], fine });
+      await updateDoc(doc(db, "books", bookId), { isAvailable: true, borrowerName: "" });
+      alert("Buku dikembalikan");
+    }
+  }
+
+  function openManualBorrowModal() {
+    modalTitle.innerText = "Pinjam Buku (Manual)";
+    // ambil daftar buku tersedia
+    const availableBooks = books.filter(b => b.isAvailable);
+    modalBody.innerHTML = `
+      <select id="bookSelect"><option value="">Pilih Buku</option>${availableBooks.map(b => `<option value="${b.id}">${escapeHtml(b.title)}</option>`).join('')}</select>
+      <input id="borrowerName" placeholder="Nama Peminjam">
+      <input type="text" id="borrowDate" placeholder="Tanggal Pinjam">
+      <input type="text" id="dueDate" placeholder="Jatuh Tempo">
+    `;
+    flatpickr("#borrowDate", { dateFormat: "Y-m-d", defaultDate: new Date() });
+    flatpickr("#dueDate", { dateFormat: "Y-m-d", defaultDate: new Date(Date.now() + 7*86400000) });
+    genericModal.style.display = "flex";
+    modalSaveBtn.onclick = async () => {
+      const bookId = document.getElementById("bookSelect").value;
+      const borrower = document.getElementById("borrowerName").value.trim();
+      const borrowDate = document.getElementById("borrowDate").value;
+      const dueDate = document.getElementById("dueDate").value;
+      if (!bookId || !borrower || !borrowDate || !dueDate) return alert("Lengkapi data");
+      const book = books.find(b => b.id === bookId);
+      if (!book || !book.isAvailable) return alert("Buku tidak tersedia");
+      await addDoc(loansCol, {
+        bookId, bookTitle: book.title, borrowerName: borrower, borrowerEmail: "",
+        borrowDate, dueDate, returnDate: null, fine: 0, status: "borrowed"
+      });
+      await updateDoc(doc(db, "books", bookId), { isAvailable: false, borrowerName: borrower });
+      alert("Peminjaman berhasil");
+      genericModal.style.display = "none";
+    };
+    modalCloseBtn.onclick = () => genericModal.style.display = "none";
+  }
+
+  // Kelola Anggota (CRUD)
+  async function renderManageMembers() {
+    contentPanel.innerHTML = `<div><button class="btn-primary" id="addMemberBtn">+ Tambah Anggota</button><div id="membersList"></div></div>`;
+    const membersDiv = document.getElementById("membersList");
+    const q = query(usersCol, where("role", "==", "anggota"));
+    const unsubscribe = onSnapshot(q, (snap) => {
+      members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      membersDiv.innerHTML = `
+        <table style="margin-top:1rem">
+          <thead><tr><th>Username</th><th>Nama Lengkap</th><th>Email</th><th>Aksi</th></tr></thead>
+          <tbody>
+            ${members.map(m => `
+              <tr>
+                <td>${escapeHtml(m.username)}</td>
+                <td>${escapeHtml(m.fullname || '')}</td>
+                <td>${escapeHtml(m.email)}</td>
+                <td><button class="editMemberBtn" data-id="${m.id}">Edit</button> <button class="deleteMemberBtn" data-id="${m.id}" data-email="${m.email}">Hapus</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      document.querySelectorAll(".editMemberBtn").forEach(btn => btn.addEventListener("click", () => openMemberModal(btn.dataset.id)));
+      document.querySelectorAll(".deleteMemberBtn").forEach(btn => btn.addEventListener("click", async () => {
+        if(confirm("Hapus anggota? Akun Firebase Auth juga akan dihapus (jika ada).")) {
+          const email = btn.dataset.email;
+          // hapus dari Firestore
+          await deleteDoc(doc(db, "users", btn.dataset.id));
+          // (Opsional) hapus user dari Auth - butuh fungsi admin, skip dulu
+          alert("Anggota dihapus dari database.");
+        }
+      }));
+    });
+    document.getElementById("addMemberBtn").onclick = () => openMemberModal(null);
+  }
+
+  async function openMemberModal(memberId) {
+    const member = memberId ? members.find(m => m.id === memberId) : null;
+    modalTitle.innerText = member ? "Edit Anggota" : "Tambah Anggota";
+    modalBody.innerHTML = `
+      <input id="memberUsername" placeholder="Username" value="${member ? escapeHtml(member.username) : ''}" ${member ? 'readonly' : ''}>
+      <input id="memberFullname" placeholder="Nama Lengkap" value="${member ? escapeHtml(member.fullname || '') : ''}">
+      <input id="memberEmail" placeholder="Email" value="${member ? escapeHtml(member.email) : ''}" ${member ? 'readonly' : ''}>
+      <input id="memberPassword" placeholder="Password" type="password" ${member ? 'placeholder="Kosongkan jika tidak diubah"' : ''}>
+    `;
+    genericModal.style.display = "flex";
+    modalSaveBtn.onclick = async () => {
+      const username = document.getElementById("memberUsername").value.trim();
+      const fullname = document.getElementById("memberFullname").value.trim();
+      const email = document.getElementById("memberEmail").value.trim();
+      const password = document.getElementById("memberPassword").value;
+      if (!username || !fullname || !email) return alert("Isi semua data (kecuali password opsional)");
+      if (memberId) {
+        // update data di Firestore
+        await updateDoc(doc(db, "users", memberId), { fullname, email });
+        if (password) {
+          // update password di Auth (perlu re-authenticate, untuk kemudahan skip)
+          alert("Ubah password tidak dapat dilakukan dari sini. Silakan gunakan reset password.");
+        }
+      } else {
+        // buat akun baru di Auth
+        try {
+          const userCred = await createUserWithEmailAndPassword(auth, email, password);
+          await setDoc(doc(db, "users", userCred.user.uid), {
+            username, fullname, email, role: "anggota"
+          });
+          alert("Anggota berhasil ditambahkan");
+        } catch(err) { alert("Gagal: " + err.message); }
+      }
+      genericModal.style.display = "none";
+    };
+    modalCloseBtn.onclick = () => genericModal.style.display = "none";
+  }
+
+  // --- DASHBOARD ANGGOTA (sederhana: pinjam dan kembali) ---
+  function renderAnggotaDashboard() {
+    const menus = [
+      { id: "pinjam", label: "📖 Peminjaman Buku", icon: "fas fa-hand-holding-heart" },
+      { id: "kembali", label: "🔄 Pengembalian", icon: "fas fa-undo-alt" }
+    ];
+    menuContainer.innerHTML = menus.map(m => `<div class="menu-card" data-menu="${m.id}"><i class="${m.icon}"></i><h4>${m.label}</h4></div>`).join('');
+    document.querySelectorAll(".menu-card").forEach(card => {
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".menu-card").forEach(c => c.classList.remove("active"));
+        card.classList.add("active");
+        if (card.dataset.menu === "pinjam") renderAnggotaPinjam();
+        else renderAnggotaKembali();
+      });
+    });
+    document.querySelector(".menu-card").click();
+  }
+
+  async function renderAnggotaPinjam() {
+    contentPanel.innerHTML = `<h3>Daftar Buku Tersedia</h3><input type="text" id="searchAnggotaPinjam" placeholder="Cari buku"><div id="availableBooksAnggota"></div>`;
+    const booksDiv = document.getElementById("availableBooksAnggota");
+    const search = document.getElementById("searchAnggotaPinjam");
+    const unsubscribe = onSnapshot(query(booksCol, orderBy("title")), (snap) => {
+      let allBooks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      let available = allBooks.filter(b => b.isAvailable);
+      const term = search ? search.value.toLowerCase() : "";
+      if (term) available = available.filter(b => b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term));
+      booksDiv.innerHTML = `<div class="books-grid">${available.map(book => `
+        <div class="book-card">
+          <strong>${escapeHtml(book.title)}</strong><br>${escapeHtml(book.author)} (${book.year})<br>
+          <button class="pinjamBtn" data-id="${book.id}" data-title="${escapeHtml(book.title)}">Pinjam</button>
+        </div>
+      `).join('')}</div>`;
+      document.querySelectorAll(".pinjamBtn").forEach(btn => btn.addEventListener("click", () => openAnggotaBorrowModal(btn.dataset.id, btn.dataset.title)));
+    });
+    if (search) search.addEventListener("input", () => {});
+  }
+
+  function openAnggotaBorrowModal(bookId, bookTitle) {
+    modalTitle.innerText = "Konfirmasi Peminjaman";
+    modalBody.innerHTML = `
+      <p>Buku: <strong>${bookTitle}</strong></p>
+      <input type="text" id="borrowDateAnggota" placeholder="Tanggal Pinjam">
+      <input type="text" id="dueDateAnggota" placeholder="Jatuh Tempo">
+    `;
+    flatpickr("#borrowDateAnggota", { dateFormat: "Y-m-d", defaultDate: new Date() });
+    flatpickr("#dueDateAnggota", { dateFormat: "Y-m-d", defaultDate: new Date(Date.now() + 7*86400000) });
+    genericModal.style.display = "flex";
+    modalSaveBtn.onclick = async () => {
+      const borrowDate = document.getElementById("borrowDateAnggota").value;
+      const dueDate = document.getElementById("dueDateAnggota").value;
+      if (!borrowDate || !dueDate) return alert("Tanggal harus diisi");
+      const book = books.find(b => b.id === bookId);
+      if (!book || !book.isAvailable) return alert("Buku tidak tersedia");
+      await addDoc(loansCol, {
+        bookId, bookTitle: book.title, borrowerName: currentUserData.username, borrowerEmail: currentUser.email,
+        borrowDate, dueDate, returnDate: null, fine: 0, status: "borrowed"
+      });
+      await updateDoc(doc(db, "books", bookId), { isAvailable: false, borrowerName: currentUserData.username });
+      alert("Buku berhasil dipinjam");
+      genericModal.style.display = "none";
+      renderAnggotaPinjam();
+    };
+    modalCloseBtn.onclick = () => genericModal.style.display = "none";
+  }
+
+  async function renderAnggotaKembali() {
+    contentPanel.innerHTML = `<h3>Buku yang Dipinjam</h3><div id="loansAnggota"></div>`;
+    const loansDiv = document.getElementById("loansAnggota");
+    const q = query(loansCol, where("borrowerEmail", "==", currentUser.email), orderBy("borrowDate", "desc"));
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const myLoans = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(l => !l.returnDate);
+      loansDiv.innerHTML = `
+        <table>
+          <thead><tr><th>Buku</th><th>Tgl Pinjam</th><th>Jatuh Tempo</th><th>Denda</th><th>Aksi</th></tr></thead>
+          <tbody>
+            ${myLoans.map(loan => {
+              const due = new Date(loan.dueDate);
+              const today = new Date();
+              let fine = today > due ? "Rp10.000" : "-";
+              return `<tr>
+                <td>${escapeHtml(loan.bookTitle)}</td>
+                <td>${loan.borrowDate}</td>
+                <td>${loan.dueDate}</td>
+                <td>${fine}</td>
+                <td><button class="returnAnggotaBtn" data-id="${loan.id}" data-bookid="${loan.bookId}">Kembalikan</button></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+      document.querySelectorAll(".returnAnggotaBtn").forEach(btn => btn.addEventListener("click", async () => {
+        await returnBook(btn.dataset.id, btn.dataset.bookid);
+        renderAnggotaKembali();
+        renderAnggotaPinjam();
+      }));
+    });
+  }
+
+  // --- AUTH STATE ---
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        currentUserData = userDoc.data();
+        currentRole = currentUserData.role;
+        userNameDisplay.innerText = currentUserData.username;
+        userRoleDisplay.innerText = currentRole === "admin" ? "Administrator" : "Anggota";
+        currentUser = user;
+        authContainer.style.display = "none";
+        dashboardContainer.style.display = "block";
+        if (currentRole === "admin") renderAdminDashboard();
+        else renderAnggotaDashboard();
+      } else {
+        // jika tidak ada role, anggap error
+        await signOut(auth);
+        alert("Akun tidak valid");
+      }
+    } else {
+      authContainer.style.display = "flex";
+      dashboardContainer.style.display = "none";
+      currentUser = null;
+      currentRole = null;
+      ensureAdminExists(); // pastikan admin default ada
+    }
+  });
+
+  // Login handler
+  let selectedRole = "admin";
+  document.querySelectorAll(".role-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".role-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      selectedRole = tab.dataset.role;
+    });
+  });
+  authSubmitBtn.addEventListener("click", async () => {
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value;
+    if (!username || !password) return authError.innerText = "Isi username & password";
+    try {
+      if (selectedRole === "admin") {
+        await loginWithUsername(username, password, "admin");
+      } else {
+        await loginWithUsername(username, password, "anggota");
+      }
+    } catch (err) {
+      authError.innerText = err.message;
+    }
+  });
+  logoutBtn.addEventListener("click", () => signOut(auth));
+  backToLoginBtn.addEventListener("click", () => signOut(auth));
 </script>
 </body>
 </html>
