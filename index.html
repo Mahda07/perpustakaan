@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>📚 PustakaKita | Perpustakaan Digital + Firebase (Pinjam & Kembali)</title>
+  <title>📚 Admin Perpustakaan | Manajemen Buku + Peminjaman + Denda</title>
   <!-- Google Fonts + Font Awesome 6 -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Flatpickr untuk date picker -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <style>
     * {
       margin: 0;
@@ -16,56 +19,91 @@
     }
 
     body {
-      background: linear-gradient(145deg, #f4f9ff 0%, #e9f0fa 100%);
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       min-height: 100vh;
       padding: 2rem 1.5rem;
     }
 
-    .library-container {
+    .app-container {
       max-width: 1400px;
       margin: 0 auto;
     }
 
     /* Header */
-    .hero-section {
-      background: rgba(255,255,255,0.6);
-      backdrop-filter: blur(8px);
+    .admin-header {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
       border-radius: 2rem;
-      padding: 1.5rem 2rem;
+      padding: 1.2rem 2rem;
       margin-bottom: 2rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-      border: 1px solid rgba(255,255,255,0.8);
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
-    .brand h1 {
-      font-size: 1.9rem;
+    .logo h1 {
+      font-size: 1.8rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #1E3C72, #2A5298);
+      background: linear-gradient(120deg, #fff, #ffd89b);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      letter-spacing: -0.3px;
     }
-    .brand p {
-      color: #2c3e66;
+    .logo p {
+      color: #cbd5e6;
+      font-size: 0.8rem;
+    }
+    .stats {
+      background: rgba(0,0,0,0.4);
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      color: white;
       font-weight: 500;
-      margin-top: 0.3rem;
-      font-size: 0.9rem;
     }
-    .stats-badge {
-      background: white;
-      padding: 0.6rem 1.2rem;
-      border-radius: 60px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+
+    /* Tab Navigation */
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      padding: 0.8rem 1.8rem;
+      border-radius: 40px;
       font-weight: 600;
-      color: #1e3c72;
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(4px);
     }
-    .stats-badge i {
-      margin-right: 8px;
-      color: #f5b042;
+    .tab-btn.active {
+      background: #ffb347;
+      color: #1e2a3a;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tab-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.25);
+    }
+
+    /* Panel */
+    .panel {
+      display: none;
+      animation: fade 0.2s ease;
+    }
+    .panel.active-panel {
+      display: block;
+    }
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(8px);}
+      to { opacity: 1; transform: translateY(0);}
     }
 
     /* Toolbar */
@@ -75,494 +113,292 @@
       justify-content: space-between;
       align-items: center;
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
-    .search-wrapper {
-      flex: 2;
-      min-width: 220px;
-      display: flex;
-      gap: 0.6rem;
+    .search-box {
       background: white;
-      padding: 0.3rem 0.3rem 0.3rem 1rem;
       border-radius: 60px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.03);
-      border: 1px solid #e2edff;
+      display: flex;
+      align-items: center;
+      padding: 0.3rem 0.3rem 0.3rem 1.2rem;
+      flex: 2;
+      min-width: 200px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .search-wrapper i {
-      color: #8ba0bc;
-      align-self: center;
-    }
-    .search-wrapper input {
+    .search-box input {
       flex: 1;
       border: none;
-      padding: 0.8rem 0;
-      font-size: 0.95rem;
-      background: transparent;
+      padding: 0.7rem 0;
       outline: none;
-      font-weight: 500;
+      background: transparent;
     }
-    .search-wrapper button {
-      background: #2a5298;
+    .search-box button {
+      background: #2c3e66;
       border: none;
       color: white;
       border-radius: 40px;
-      padding: 0 1.2rem;
-      font-weight: 500;
+      padding: 0.5rem 1.2rem;
       cursor: pointer;
-      transition: 0.2s;
-    }
-    .search-wrapper button:hover {
-      background: #1e3c72;
     }
     .btn-primary {
-      background: linear-gradient(100deg, #1e3c72, #2a5298);
+      background: linear-gradient(95deg, #ffb347, #ff8c00);
       border: none;
-      padding: 0.8rem 1.6rem;
+      padding: 0.7rem 1.5rem;
       border-radius: 40px;
-      color: white;
       font-weight: 600;
-      font-size: 0.95rem;
+      color: #1e2a3a;
       cursor: pointer;
-      transition: 0.2s;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 6px 14px rgba(30,60,114,0.25);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: 0.2s;
     }
     .btn-primary:hover {
       transform: translateY(-2px);
-      background: linear-gradient(100deg, #102b4e, #1f3f72);
-      box-shadow: 0 12px 20px rgba(30,60,114,0.3);
+      filter: brightness(1.05);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: white;
     }
 
-    /* Grid Buku */
+    /* Grid buku */
     .books-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.8rem;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.5rem;
       margin-top: 1rem;
-      margin-bottom: 2rem;
     }
     .book-card {
       background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(2px);
       border-radius: 1.5rem;
       overflow: hidden;
-      transition: all 0.25s ease;
-      box-shadow: 0 12px 24px -12px rgba(0,0,0,0.1);
-      border: 1px solid rgba(255,255,255,0.6);
+      transition: 0.2s;
+      box-shadow: 0 12px 24px -12px black;
     }
     .book-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 24px 36px -14px rgba(0, 0, 0, 0.2);
-      background: white;
+      transform: translateY(-5px);
     }
-    .book-cover-icon {
-      background: linear-gradient(130deg, #eef3fc, #dde6f2);
+    .book-cover {
+      background: #eef2f5;
       text-align: center;
-      padding: 1.5rem 0;
-      font-size: 3.2rem;
-      color: #2a5298;
+      padding: 1.2rem;
+      font-size: 2.5rem;
+      color: #ff8c00;
     }
-    .book-info {
-      padding: 1.2rem 1.2rem 1rem;
+    .book-details {
+      padding: 1rem;
     }
     .book-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #1f2f47;
-      margin-bottom: 0.4rem;
-      line-height: 1.3;
-    }
-    .book-author {
-      color: #4a627a;
-      font-weight: 500;
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .book-year {
-      display: inline-block;
-      background: #ecf3fa;
-      padding: 0.2rem 0.7rem;
-      border-radius: 30px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #1e4d8f;
-      margin-top: 0.4rem;
+      font-weight: 800;
+      font-size: 1.2rem;
     }
     .status-badge {
       display: inline-block;
-      margin-left: 0.6rem;
-      padding: 0.2rem 0.7rem;
-      border-radius: 30px;
       font-size: 0.7rem;
-      font-weight: 700;
-      vertical-align: middle;
-    }
-    .status-available {
-      background: #dff9e6;
-      color: #2b7e3a;
-    }
-    .status-borrowed {
-      background: #ffe8e0;
-      color: #c23d1c;
-    }
-    .borrower-name {
-      display: block;
-      font-size: 0.7rem;
-      margin-top: 6px;
-      color: #c2412c;
-      background: #fff0ed;
       padding: 0.2rem 0.6rem;
       border-radius: 20px;
-      width: fit-content;
+      margin-left: 0.5rem;
+    }
+    .available {
+      background: #c8f0d1;
+      color: #1f6e3a;
+    }
+    .borrowed {
+      background: #ffe0d4;
+      color: #b4512c;
     }
     .card-actions {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      padding: 0.8rem 1.2rem 1.2rem;
-      border-top: 1px solid #edf2f7;
       gap: 8px;
+      padding: 0.8rem 1rem 1rem;
+      border-top: 1px solid #eef2f5;
     }
     .card-actions button {
-      flex: 1 0 auto;
-      min-width: 70px;
+      flex: 1;
       border: none;
-      padding: 0.5rem 0;
+      padding: 0.4rem;
       border-radius: 30px;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
-      transition: 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-size: 0.8rem;
     }
-    .btn-edit {
-      background: #eff6ff;
-      color: #2c6e9e;
+
+    /* Tabel peminjaman */
+    .loans-table-container {
+      background: rgba(255,255,255,0.95);
+      border-radius: 1.5rem;
+      padding: 1rem;
+      overflow-x: auto;
     }
-    .btn-edit:hover {
-      background: #e0edfe;
-      color: #1a4a70;
+    table {
+      width: 100%;
+      border-collapse: collapse;
     }
-    .btn-delete {
-      background: #fff4f2;
-      color: #c2412c;
+    th, td {
+      padding: 1rem 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
     }
-    .btn-delete:hover {
-      background: #ffe6e2;
-      color: #a1301c;
+    th {
+      background: #f8fafc;
+      color: #1e293b;
     }
-    .btn-borrow {
-      background: #e0f2fe;
-      color: #0369a1;
-    }
-    .btn-borrow:hover {
-      background: #bae6fd;
+    .fine-badge {
+      background: #fee2e2;
+      color: #b91c1c;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-weight: 600;
     }
     .btn-return {
       background: #ffedea;
-      color: #b45329;
-    }
-    .btn-return:hover {
-      background: #ffdad3;
-    }
-    /* Daftar Peminjaman Aktif */
-    .loans-section {
-      background: white;
-      border-radius: 1.8rem;
-      padding: 1.5rem;
-      margin: 1.5rem 0 1rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-      border: 1px solid rgba(255,255,255,0.6);
-    }
-    .loans-section h3 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #1e3c72;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .loans-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1rem;
-    }
-    .loan-card {
-      background: #fefcf5;
-      border-radius: 1.2rem;
-      padding: 1rem;
-      border-left: 5px solid #f5b042;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-    }
-    .loan-info {
-      flex: 2;
-    }
-    .loan-title {
-      font-weight: 700;
-      color: #1f2f47;
-      font-size: 1rem;
-    }
-    .loan-borrower {
-      font-size: 0.85rem;
-      color: #c2412c;
-      margin-top: 4px;
-    }
-    .loan-borrower i {
-      margin-right: 4px;
-    }
-    .btn-return-loan {
-      background: #ffedea;
       border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 40px;
-      font-weight: 600;
-      color: #b45329;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
       cursor: pointer;
-      transition: 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
+      font-weight: 600;
     }
-    .btn-return-loan:hover {
-      background: #ffdad3;
-      transform: scale(0.98);
-    }
-    .empty-loans {
-      text-align: center;
-      color: #6c86a3;
-      padding: 1.5rem;
-      font-style: italic;
-    }
-    .empty-message {
-      text-align: center;
-      grid-column: 1 / -1;
-      background: white;
-      padding: 3rem;
-      border-radius: 2rem;
-      color: #5f7f9e;
-    }
-    .loading-spinner {
-      text-align: center;
-      grid-column: 1 / -1;
-      padding: 3rem;
-      font-size: 1.2rem;
-      color: #2a5298;
-    }
-
-    /* Modal */
-    .modal-overlay {
+    .modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(5px);
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
       visibility: hidden;
       opacity: 0;
-      transition: all 0.2s ease;
+      transition: 0.2s;
       z-index: 1000;
     }
-    .modal-overlay.active {
+    .modal.active {
       visibility: visible;
       opacity: 1;
     }
-    .modal-container {
+    .modal-content {
       background: white;
-      max-width: 480px;
+      max-width: 500px;
       width: 90%;
       border-radius: 2rem;
-      padding: 1.8rem 1.8rem 2rem;
-      box-shadow: 0 30px 40px rgba(0,0,0,0.2);
-      transform: scale(0.96);
-      transition: transform 0.2s;
-    }
-    .modal-overlay.active .modal-container {
-      transform: scale(1);
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-    .modal-header h3 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #1e3c72;
-    }
-    .close-modal {
-      background: none;
-      border: none;
-      font-size: 1.6rem;
-      cursor: pointer;
-      color: #8caccc;
+      padding: 1.8rem;
     }
     .form-group {
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
     }
     .form-group label {
-      display: block;
       font-weight: 600;
-      margin-bottom: 0.4rem;
-      color: #2c3e66;
+      display: block;
+      margin-bottom: 0.3rem;
     }
-    .form-group input {
+    .form-group input, .form-group select {
       width: 100%;
-      padding: 0.9rem 1rem;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 1.2rem;
-      font-size: 1rem;
-      transition: 0.2s;
-      outline: none;
-    }
-    .form-group input:focus {
-      border-color: #2a5298;
-      box-shadow: 0 0 0 3px rgba(42,82,152,0.2);
+      padding: 0.7rem;
+      border-radius: 1rem;
+      border: 1px solid #ccc;
     }
     .modal-buttons {
       display: flex;
-      gap: 12px;
-      margin-top: 1.8rem;
-    }
-    .modal-buttons button {
-      flex: 1;
-      padding: 0.8rem;
-      border-radius: 40px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-    }
-    .btn-save {
-      background: #2a5298;
-      color: white;
-    }
-    .btn-cancel {
-      background: #f1f5f9;
-      color: #475569;
+      gap: 1rem;
+      margin-top: 1.5rem;
     }
     footer {
       text-align: center;
       margin-top: 2rem;
-      font-size: 0.8rem;
-      color: #6c86a3;
+      color: #a0b8d0;
     }
-    @media (max-width: 640px) {
+    @media (max-width: 700px) {
       body { padding: 1rem; }
-      .hero-section { flex-direction: column; align-items: start; gap: 1rem; }
-      .toolbar { flex-direction: column; align-items: stretch; }
-      .card-actions button { font-size: 0.7rem; min-width: 60px; }
-      .loan-card { flex-direction: column; align-items: flex-start; }
+      th, td { font-size: 0.8rem; padding: 0.6rem; }
     }
   </style>
 </head>
 <body>
-
-<div class="library-container">
-  <div class="hero-section">
-    <div class="brand">
-      <h1><i class="fas fa-cloud-upload-alt"></i> PustakaKita <span style="font-size: 0.9rem;">+ Firebase</span></h1>
-      <p>CRUD realtime + Peminjaman & Pengembalian</p>
+<div class="app-container">
+  <div class="admin-header">
+    <div class="logo">
+      <h1><i class="fas fa-landmark"></i> Admin Perpustakaan</h1>
+      <p>Manajemen Buku + Peminjaman & Denda Otomatis</p>
     </div>
-    <div class="stats-badge" id="totalStats">
-      <i class="fas fa-layer-group"></i> <span id="bookCount">0</span> Buku
-    </div>
-  </div>
-
-  <div class="toolbar">
-    <div class="search-wrapper">
-      <i class="fas fa-search"></i>
-      <input type="text" id="searchInput" placeholder="Cari judul atau penulis..." autocomplete="off">
-      <button id="resetSearchBtn"><i class="fas fa-times"></i> Reset</button>
-    </div>
-    <button id="openAddModalBtn" class="btn-primary"><i class="fas fa-plus-circle"></i> Tambah Buku</button>
-  </div>
-
-  <div id="booksGrid" class="books-grid">
-    <div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> Memuat data dari Firebase...</div>
-  </div>
-
-  <!-- Daftar Peminjaman Aktif (form untuk melihat nama peminjam & mengembalikan) -->
-  <div id="activeLoansSection" class="loans-section" style="display: none;">
-    <h3><i class="fas fa-hand-holding-heart"></i> 📋 Daftar Peminjaman Aktif</h3>
-    <div id="loansContainer" class="loans-grid">
-      <!-- isi dinamis -->
+    <div class="stats" id="globalStats">
+      <i class="fas fa-chart-line"></i> <span id="statsTotalBooks">0</span> Buku | 
+      <span id="statsLoansActive">0</span> Dipinjam
     </div>
   </div>
 
-  <footer>
-    <i class="fas fa-database"></i> Terhubung ke Firestore | Buku tersedia bisa dipinjam
-  </footer>
-</div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="booksTab"><i class="fas fa-book"></i> Katalog Buku</button>
+    <button class="tab-btn" data-tab="loansTab"><i class="fas fa-hand-holding-heart"></i> Peminjaman & Denda</button>
+  </div>
 
-<!-- Modal untuk Tambah/Edit Buku -->
-<div id="modalOverlay" class="modal-overlay">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3 id="modalTitle">Tambah Buku</h3>
-      <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
+  <!-- Panel Buku -->
+  <div id="booksPanel" class="panel active-panel">
+    <div class="toolbar">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchBookInput" placeholder="Cari judul / penulis...">
+        <button id="resetBookSearch"><i class="fas fa-times"></i> Reset</button>
+      </div>
+      <button id="openAddBookModal" class="btn-primary"><i class="fas fa-plus-circle"></i> Tambah Buku</button>
     </div>
-    <div class="form-group">
-      <label><i class="fas fa-heading"></i> Judul Buku</label>
-      <input type="text" id="bookTitle" placeholder="Misal: Laskar Pelangi" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label><i class="fas fa-user-pen"></i> Penulis</label>
-      <input type="text" id="bookAuthor" placeholder="Nama penulis" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label><i class="fas fa-calendar-alt"></i> Tahun Terbit</label>
-      <input type="number" id="bookYear" placeholder="2024" min="1000" max="2030">
-    </div>
-    <div class="modal-buttons">
-      <button class="btn-save" id="saveBookBtn"><i class="fas fa-save"></i> Simpan</button>
-      <button class="btn-cancel" id="cancelModalBtn">Batal</button>
+    <div id="booksGridContainer" class="books-grid">
+      <div class="loading-spinner">Memuat data buku...</div>
     </div>
   </div>
-</div>
 
-<!-- Modal khusus untuk Peminjaman Buku -->
-<div id="loanModal" class="modal-overlay">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3 id="loanModalTitle">📘 Pinjam Buku</h3>
-      <button class="close-modal" id="closeLoanModalBtn"><i class="fas fa-times"></i></button>
+  <!-- Panel Peminjaman -->
+  <div id="loansPanel" class="panel">
+    <div class="toolbar">
+      <button id="openBorrowModalBtn" class="btn-primary"><i class="fas fa-user-plus"></i> + Peminjaman Baru</button>
+      <div class="search-box" style="max-width: 300px;">
+        <input type="text" id="searchLoanInput" placeholder="Cari peminjam / buku...">
+      </div>
     </div>
-    <div id="loanBookInfo" style="background:#f0f4fa; padding:0.6rem; border-radius:1rem; margin-bottom:1rem; font-size:0.9rem;">
-      <i class="fas fa-book"></i> <strong id="loanBookTitle">Judul buku</strong>
+    <div class="loans-table-container">
+      <table id="loansTable">
+        <thead>
+          <tr><th>Buku</th><th>Peminjam</th><th>Tgl Pinjam</th><th>Jatuh Tempo</th><th>Status</th><th>Denda</th><th>Aksi</th></tr>
+        </thead>
+        <tbody id="loansTableBody">
+          <tr><td colspan="7">Memuat data peminjaman...</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="form-group">
-      <label><i class="fas fa-user"></i> Nama Peminjam</label>
-      <input type="text" id="borrowerNameInput" placeholder="Contoh: Ahmad Wijaya" autocomplete="off">
+  </div>
+
+  <!-- Modal Tambah/Edit Buku -->
+  <div id="bookModal" class="modal">
+    <div class="modal-content">
+      <h3 id="bookModalTitle">Tambah Buku</h3>
+      <div class="form-group"><label>Judul</label><input id="bookTitle" placeholder="Judul buku"></div>
+      <div class="form-group"><label>Penulis</label><input id="bookAuthor" placeholder="Penulis"></div>
+      <div class="form-group"><label>Tahun</label><input id="bookYear" placeholder="Tahun" type="number"></div>
+      <div class="modal-buttons"><button id="saveBookBtn" class="btn-primary">Simpan</button><button id="closeBookModal" class="btn-secondary" style="background:#ccc;">Batal</button></div>
     </div>
-    <div class="modal-buttons">
-      <button class="btn-save" id="confirmLoanBtn"><i class="fas fa-check-circle"></i> Konfirmasi Pinjam</button>
-      <button class="btn-cancel" id="cancelLoanBtn">Batal</button>
+  </div>
+
+  <!-- Modal Peminjaman Baru -->
+  <div id="borrowModal" class="modal">
+    <div class="modal-content">
+      <h3><i class="fas fa-book-open"></i> Form Peminjaman</h3>
+      <div class="form-group"><label>Pilih Buku</label><select id="bookSelect"></select></div>
+      <div class="form-group"><label>Nama Peminjam</label><input id="borrowerName" placeholder="Nama lengkap"></div>
+      <div class="form-group"><label>Tanggal Pinjam</label><input type="text" id="borrowDate" placeholder="Pilih tanggal"></div>
+      <div class="form-group"><label>Tanggal Jatuh Tempo (rencana kembali)</label><input type="text" id="dueDate"></div>
+      <div class="modal-buttons"><button id="confirmBorrowBtn" class="btn-primary">Pinjam Buku</button><button id="closeBorrowModal" class="btn-secondary">Batal</button></div>
     </div>
   </div>
 </div>
+<footer><i class="fas fa-database"></i> Terintegrasi Firebase | Denda keterlambatan: Rp10.000 (flat)</footer>
 
-<!-- Firebase SDKs -->
 <script type="module">
-  // ======================= KONFIGURASI FIREBASE =======================
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, getDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
   const firebaseConfig = {
     apiKey: "AIzaSyCfqZD7UZZt-GWmtNhfJyksrv3-8ENRjto",
     authDomain: "insan-cemerlang-d5574.firebaseapp.com",
@@ -572,430 +408,314 @@
     appId: "1:1035937160050:web:6d77d3874c3f78b2811beb",
     measurementId: "G-EVVQ80Q08C"
   };
-  
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const booksCollection = collection(db, "books");
-  const booksQuery = query(booksCollection, orderBy("title", "asc"));
-  
+  const booksCol = collection(db, "books");
+  const loansCol = collection(db, "borrowings");
+
   // State
-  let booksList = [];
+  let books = [];          // semua buku dari firestore
+  let loans = [];          // semua peminjaman
   let currentEditId = null;
-  let searchTerm = "";
-  let pendingLoanBookId = null;
-  
-  // DOM elements
-  const booksGrid = document.getElementById('booksGrid');
-  const searchInput = document.getElementById('searchInput');
-  const resetSearchBtn = document.getElementById('resetSearchBtn');
-  const openAddModalBtn = document.getElementById('openAddModalBtn');
-  const modalOverlay = document.getElementById('modalOverlay');
-  const closeModalBtn = document.getElementById('closeModalBtn');
-  const cancelModalBtn = document.getElementById('cancelModalBtn');
-  const saveBookBtn = document.getElementById('saveBookBtn');
-  const modalTitleElem = document.getElementById('modalTitle');
-  const bookTitleInput = document.getElementById('bookTitle');
-  const bookAuthorInput = document.getElementById('bookAuthor');
-  const bookYearInput = document.getElementById('bookYear');
-  const bookCountSpan = document.getElementById('bookCount');
-  
-  // Elemen modal pinjam
-  const loanModal = document.getElementById('loanModal');
-  const closeLoanModalBtn = document.getElementById('closeLoanModalBtn');
-  const cancelLoanBtn = document.getElementById('cancelLoanBtn');
-  const confirmLoanBtn = document.getElementById('confirmLoanBtn');
-  const borrowerNameInput = document.getElementById('borrowerNameInput');
-  const loanBookTitleSpan = document.getElementById('loanBookTitle');
-  
-  // Elemen daftar peminjaman aktif
-  const activeLoansSection = document.getElementById('activeLoansSection');
-  const loansContainer = document.getElementById('loansContainer');
-  
-  // Helper escape HTML
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
-  }
-  
-  // Render daftar peminjaman aktif (menampilkan semua buku yang sedang dipinjam)
-  function renderActiveLoans() {
-    const borrowedBooks = booksList.filter(book => book.isAvailable === false);
-    if (borrowedBooks.length === 0) {
-      activeLoansSection.style.display = 'none';
-      return;
-    }
-    activeLoansSection.style.display = 'block';
-    let loansHtml = '';
-    borrowedBooks.forEach(book => {
-      loansHtml += `
-        <div class="loan-card" data-loan-id="${book.id}">
-          <div class="loan-info">
-            <div class="loan-title"><i class="fas fa-book"></i> ${escapeHtml(book.title)}</div>
-            <div class="loan-borrower"><i class="fas fa-user"></i> Dipinjam oleh: ${escapeHtml(book.borrowerName || 'Tidak diketahui')}</div>
-          </div>
-          <button class="btn-return-loan return-from-list-btn" data-id="${book.id}"><i class="fas fa-undo-alt"></i> Kembalikan Buku</button>
-        </div>
-      `;
-    });
-    loansContainer.innerHTML = loansHtml;
-  }
-  
-  // Render buku utama (grid)
+  let bookSearchTerm = "";
+  let loanSearchTerm = "";
+
+  // DOM Elements
+  const booksGridDiv = document.getElementById("booksGridContainer");
+  const loansTableBody = document.getElementById("loansTableBody");
+  const searchBookInput = document.getElementById("searchBookInput");
+  const resetBookSearch = document.getElementById("resetBookSearch");
+  const openAddBookModal = document.getElementById("openAddBookModal");
+  const bookModal = document.getElementById("bookModal");
+  const saveBookBtn = document.getElementById("saveBookBtn");
+  const closeBookModal = document.getElementById("closeBookModal");
+  const bookTitle = document.getElementById("bookTitle");
+  const bookAuthor = document.getElementById("bookAuthor");
+  const bookYear = document.getElementById("bookYear");
+  const bookModalTitle = document.getElementById("bookModalTitle");
+  const openBorrowModalBtn = document.getElementById("openBorrowModalBtn");
+  const borrowModal = document.getElementById("borrowModal");
+  const closeBorrowModal = document.getElementById("closeBorrowModal");
+  const confirmBorrowBtn = document.getElementById("confirmBorrowBtn");
+  const bookSelect = document.getElementById("bookSelect");
+  const borrowerName = document.getElementById("borrowerName");
+  const borrowDateInput = document.getElementById("borrowDate");
+  const dueDateInput = document.getElementById("dueDate");
+  const searchLoanInput = document.getElementById("searchLoanInput");
+  const statsTotalBooks = document.getElementById("statsTotalBooks");
+  const statsLoansActive = document.getElementById("statsLoansActive");
+
+  // Flatpickr initialization
+  flatpickr(borrowDateInput, { dateFormat: "Y-m-d", defaultDate: new Date() });
+  flatpickr(dueDateInput, { dateFormat: "Y-m-d", defaultDate: new Date(Date.now() + 7*86400000) });
+
+  // Helper: Render Buku
   function renderBooks() {
-    let filtered = booksList;
-    if (searchTerm.trim() !== "") {
-      const term = searchTerm.trim().toLowerCase();
-      filtered = booksList.filter(book => 
-        book.title.toLowerCase().includes(term) || 
-        book.author.toLowerCase().includes(term)
-      );
-    }
-    bookCountSpan.innerText = filtered.length;
-    
+    let filtered = books.filter(b => b.title.toLowerCase().includes(bookSearchTerm) || b.author.toLowerCase().includes(bookSearchTerm));
+    statsTotalBooks.innerText = books.length;
     if (filtered.length === 0) {
-      booksGrid.innerHTML = `<div class="empty-message"><i class="fas fa-book-open" style="font-size: 3rem; opacity: 0.5;"></i><p style="margin-top: 1rem;">📭 Tidak ada buku.<br>Tambahkan koleksi baru atau ubah kata kunci.</p></div>`;
+      booksGridDiv.innerHTML = `<div class="empty-message">📭 Tidak ada buku ditemukan.</div>`;
       return;
     }
-    
-    let html = '';
+    let html = "";
     filtered.forEach(book => {
-      const isAvailable = book.isAvailable !== undefined ? book.isAvailable : true;
-      const borrower = book.borrowerName || '';
-      let statusBadge = '';
-      let borrowerHtml = '';
-      let actionButton = '';
-      
-      if (isAvailable) {
-        statusBadge = '<span class="status-badge status-available"><i class="fas fa-check-circle"></i> Tersedia</span>';
-        actionButton = `<button class="btn-borrow borrow-btn" data-id="${book.id}"><i class="fas fa-hand-holding-heart"></i> Pinjam</button>`;
-      } else {
-        statusBadge = '<span class="status-badge status-borrowed"><i class="fas fa-book-open-reader"></i> Dipinjam</span>';
-        if (borrower) {
-          borrowerHtml = `<div class="borrower-name"><i class="fas fa-user"></i> ${escapeHtml(borrower)}</div>`;
-        }
-        actionButton = `<button class="btn-return return-btn" data-id="${book.id}"><i class="fas fa-undo-alt"></i> Kembalikan</button>`;
-      }
-      
+      const isAvailable = book.isAvailable !== false;
+      const statusClass = isAvailable ? "available" : "borrowed";
+      const statusText = isAvailable ? "Tersedia" : "Dipinjam";
       html += `
-        <div class="book-card" data-id="${book.id}">
-          <div class="book-cover-icon">
-            <i class="fas fa-book"></i>
-          </div>
-          <div class="book-info">
-            <div class="book-title">${escapeHtml(book.title)} ${statusBadge}</div>
-            <div class="book-author"><i class="fas fa-feather-alt"></i> ${escapeHtml(book.author)}</div>
-            <div class="book-year"><i class="far fa-calendar-alt"></i> ${book.year}</div>
-            ${borrowerHtml}
+        <div class="book-card">
+          <div class="book-cover"><i class="fas fa-book"></i></div>
+          <div class="book-details">
+            <div class="book-title">${escapeHtml(book.title)} <span class="status-badge ${statusClass}">${statusText}</span></div>
+            <div>${escapeHtml(book.author)} (${book.year})</div>
           </div>
           <div class="card-actions">
-            <button class="btn-edit edit-btn" data-id="${book.id}"><i class="fas fa-pen"></i> Edit</button>
-            <button class="btn-delete delete-btn" data-id="${book.id}"><i class="fas fa-trash-alt"></i> Hapus</button>
-            ${actionButton}
+            <button class="edit-book-btn" data-id="${book.id}" style="background:#eef2ff;">✏️ Edit</button>
+            <button class="delete-book-btn" data-id="${book.id}" style="background:#ffe0dd;">🗑 Hapus</button>
           </div>
         </div>
       `;
     });
-    booksGrid.innerHTML = html;
-  }
-  
-  // Subscribe realtime ke Firestore
-  function subscribeToBooks() {
-    onSnapshot(booksQuery, (snapshot) => {
-      booksList = [];
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        booksList.push({
-          id: docSnap.id,
-          title: data.title,
-          author: data.author,
-          year: data.year,
-          isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
-          borrowerName: data.borrowerName || ''
-        });
+    booksGridDiv.innerHTML = html;
+    // attach event after render
+    document.querySelectorAll(".edit-book-btn").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const id = btn.dataset.id;
+        const book = books.find(b => b.id === id);
+        if (book) openEditBookModal(book);
       });
-      renderBooks();
-      renderActiveLoans();  // update daftar peminjaman aktif setiap ada perubahan
-    }, (error) => {
-      console.error("Firestore error:", error);
-      booksGrid.innerHTML = `<div class="empty-message"><i class="fas fa-exclamation-triangle"></i> Gagal memuat data. Pastikan konfigurasi Firebase benar dan Firestore sudah diaktifkan.<br><small>${error.message}</small></div>`;
-      activeLoansSection.style.display = 'none';
+    });
+    document.querySelectorAll(".delete-book-btn").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        if (confirm("Hapus buku permanen?")) {
+          await deleteDoc(doc(db, "books", btn.dataset.id));
+        }
+      });
     });
   }
-  
-  // --- CRUD Buku ---
-  async function addBookToFirebase(title, author, year) {
-    if (!title.trim() || !author.trim() || !year) {
-      alert("⚠️ Semua field harus diisi!");
-      return false;
-    }
-    const yearNum = parseInt(year);
-    if (isNaN(yearNum) || yearNum < 1000 || yearNum > new Date().getFullYear() + 5) {
-      alert("📅 Tahun terbit tidak valid (1000 - 2030)");
-      return false;
-    }
-    try {
-      await addDoc(booksCollection, {
-        title: title.trim(),
-        author: author.trim(),
-        year: yearNum,
-        isAvailable: true,
-        borrowerName: "",
-        createdAt: new Date()
-      });
-      return true;
-    } catch (err) {
-      alert("Gagal menambahkan: " + err.message);
-      return false;
-    }
-  }
-  
-  async function updateBookInFirebase(id, title, author, year) {
-    if (!title.trim() || !author.trim() || !year) {
-      alert("⚠️ Field tidak boleh kosong!");
-      return false;
-    }
-    const yearNum = parseInt(year);
-    if (isNaN(yearNum) || yearNum < 1000 || yearNum > new Date().getFullYear() + 5) {
-      alert("📅 Tahun terbit tidak valid");
-      return false;
-    }
-    try {
-      const bookRef = doc(db, "books", id);
-      await updateDoc(bookRef, {
-        title: title.trim(),
-        author: author.trim(),
-        year: yearNum
-      });
-      return true;
-    } catch (err) {
-      alert("Gagal update: " + err.message);
-      return false;
-    }
-  }
-  
-  async function deleteBookFromFirebase(id) {
-    const confirmDel = confirm("⚠️ Yakin ingin menghapus buku ini secara permanen?");
-    if (!confirmDel) return false;
-    try {
-      const bookRef = doc(db, "books", id);
-      await deleteDoc(bookRef);
-      return true;
-    } catch (err) {
-      alert("Gagal hapus: " + err.message);
-      return false;
-    }
-  }
-  
-  // --- Peminjaman & Pengembalian ---
-  async function borrowBook(bookId, borrowerName) {
-    if (!borrowerName.trim()) {
-      alert("Nama peminjam harus diisi!");
-      return false;
-    }
-    const book = booksList.find(b => b.id === bookId);
-    if (!book) {
-      alert("Buku tidak ditemukan.");
-      return false;
-    }
-    if (!book.isAvailable) {
-      alert(`Buku "${book.title}" sedang dipinjam oleh ${book.borrowerName || 'peminjam lain'}.`);
-      return false;
-    }
-    try {
-      const bookRef = doc(db, "books", bookId);
-      await updateDoc(bookRef, {
-        isAvailable: false,
-        borrowerName: borrowerName.trim(),
-        borrowedAt: new Date()
-      });
-      return true;
-    } catch (err) {
-      alert("Gagal meminjam: " + err.message);
-      return false;
-    }
-  }
-  
-  async function returnBook(bookId) {
-    const book = booksList.find(b => b.id === bookId);
-    if (!book) return false;
-    if (book.isAvailable) {
-      alert("Buku ini sedang tidak dipinjam.");
-      return false;
-    }
-    const confirmReturn = confirm(`Kembalikan buku "${book.title}"?`);
-    if (!confirmReturn) return false;
-    try {
-      const bookRef = doc(db, "books", bookId);
-      await updateDoc(bookRef, {
-        isAvailable: true,
-        borrowerName: "",
-        returnedAt: new Date()
-      });
-      return true;
-    } catch (err) {
-      alert("Gagal mengembalikan: " + err.message);
-      return false;
-    }
-  }
-  
-  // --- Modal Pinjam ---
-  function openLoanModal(bookId) {
-    const book = booksList.find(b => b.id === bookId);
-    if (!book) return;
-    if (!book.isAvailable) {
-      alert(`Buku "${book.title}" sedang dipinjam. Tidak bisa dipinjam lagi.`);
+
+  // Render Loans (Peminjaman)
+  async function renderLoans() {
+    // ambil loans dari state + hitung denda jika terlambat dan belum dikembalikan
+    let filtered = loans.filter(l => 
+      l.borrowerName.toLowerCase().includes(loanSearchTerm) || 
+      (l.bookTitle || "").toLowerCase().includes(loanSearchTerm)
+    );
+    const activeLoansCount = loans.filter(l => !l.returnDate).length;
+    statsLoansActive.innerText = activeLoansCount;
+    if (filtered.length === 0) {
+      loansTableBody.innerHTML = `<tr><td colspan="7">Tidak ada data peminjaman.</td></tr>`;
       return;
     }
-    pendingLoanBookId = bookId;
-    loanBookTitleSpan.innerText = book.title;
-    borrowerNameInput.value = "";
-    loanModal.classList.add("active");
-  }
-  
-  function closeLoanModal() {
-    loanModal.classList.remove("active");
-    pendingLoanBookId = null;
-    borrowerNameInput.value = "";
-  }
-  
-  async function handleConfirmLoan() {
-    if (!pendingLoanBookId) return;
-    const borrower = borrowerNameInput.value.trim();
-    const success = await borrowBook(pendingLoanBookId, borrower);
-    if (success) closeLoanModal();
-  }
-  
-  // --- Modal Tambah/Edit ---
-  function openModalForAdd() {
-    currentEditId = null;
-    modalTitleElem.innerText = "📖 Tambah Buku Baru";
-    bookTitleInput.value = "";
-    bookAuthorInput.value = "";
-    bookYearInput.value = "";
-    modalOverlay.classList.add("active");
-  }
-  
-  function openModalForEdit(book) {
-    currentEditId = book.id;
-    modalTitleElem.innerText = "✏️ Edit Buku";
-    bookTitleInput.value = book.title;
-    bookAuthorInput.value = book.author;
-    bookYearInput.value = book.year;
-    modalOverlay.classList.add("active");
-  }
-  
-  function closeModal() {
-    modalOverlay.classList.remove("active");
-    currentEditId = null;
-  }
-  
-  async function handleSave() {
-    const title = bookTitleInput.value;
-    const author = bookAuthorInput.value;
-    const year = bookYearInput.value;
-    
-    if (currentEditId === null) {
-      const success = await addBookToFirebase(title, author, year);
-      if (success) {
-        closeModal();
-        searchTerm = "";
-        searchInput.value = "";
+    let rows = "";
+    for (let loan of filtered) {
+      const isReturned = !!loan.returnDate;
+      let status = isReturned ? "Dikembalikan" : "Dipinjam";
+      let fineDisplay = "-";
+      let fineAmount = 0;
+      if (!isReturned) {
+        // hitung denda jika melebihi dueDate (hari ini > dueDate)
+        const today = new Date();
+        const due = new Date(loan.dueDate);
+        if (today > due) fineAmount = 10000; // flat denda 10rb jika terlambat
+        if (fineAmount > 0) fineDisplay = `<span class="fine-badge">Rp ${fineAmount.toLocaleString()}</span> (belum dibayar)`;
+        else fineDisplay = "Tepat waktu";
+      } else {
+        if (loan.fine && loan.fine > 0) fineDisplay = `<span class="fine-badge">Rp ${loan.fine.toLocaleString()}</span> (lunas)`;
+        else fineDisplay = "-";
       }
-    } else {
-      const success = await updateBookInFirebase(currentEditId, title, author, year);
-      if (success) closeModal();
+      rows += `
+        <tr>
+          <td>${escapeHtml(loan.bookTitle || "Tidak diketahui")}</td>
+          <td>${escapeHtml(loan.borrowerName)}</td>
+          <td>${loan.borrowDate}</td>
+          <td>${loan.dueDate}</td>
+          <td>${status}</td>
+          <td>${fineDisplay}</td>
+          <td>${!isReturned ? `<button class="return-book-btn" data-id="${loan.id}" data-bookid="${loan.bookId}">📖 Kembalikan</button>` : '-'}</td>
+        </tr>
+      `;
     }
-  }
-  
-  // Event Delegation untuk semua tombol (termasuk tombol return di daftar peminjaman)
-  function bindGlobalEvents() {
-    // Untuk tombol di grid buku (edit, hapus, pinjam, kembali)
-    booksGrid.addEventListener('click', async (e) => {
-      const editBtn = e.target.closest('.edit-btn');
-      if (editBtn && editBtn.dataset.id) {
-        const bookId = editBtn.dataset.id;
-        const book = booksList.find(b => b.id === bookId);
-        if (book) openModalForEdit(book);
-        return;
-      }
-      const delBtn = e.target.closest('.delete-btn');
-      if (delBtn && delBtn.dataset.id) {
-        const bookId = delBtn.dataset.id;
-        await deleteBookFromFirebase(bookId);
-        return;
-      }
-      const borrowBtn = e.target.closest('.borrow-btn');
-      if (borrowBtn && borrowBtn.dataset.id) {
-        const bookId = borrowBtn.dataset.id;
-        openLoanModal(bookId);
-        return;
-      }
-      const returnBtn = e.target.closest('.return-btn');
-      if (returnBtn && returnBtn.dataset.id) {
-        const bookId = returnBtn.dataset.id;
-        await returnBook(bookId);
-        return;
-      }
-    });
-    
-    // Event untuk tombol kembali di daftar peminjaman aktif (form pengembalian)
-    loansContainer.addEventListener('click', async (e) => {
-      const returnLoanBtn = e.target.closest('.return-from-list-btn');
-      if (returnLoanBtn && returnLoanBtn.dataset.id) {
-        const bookId = returnLoanBtn.dataset.id;
-        await returnBook(bookId);
-      }
+    loansTableBody.innerHTML = rows;
+    // attach return event
+    document.querySelectorAll(".return-book-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const loanId = btn.dataset.id;
+        const bookId = btn.dataset.bookid;
+        await returnBook(loanId, bookId);
+      });
     });
   }
-  
-  // Search handlers
-  function handleSearch() {
-    searchTerm = searchInput.value;
-    renderBooks();
-  }
-  
-  function resetSearch() {
-    searchTerm = "";
-    searchInput.value = "";
-    renderBooks();
-  }
-  
-  // Inisialisasi semua event & Firebase
-  function init() {
-    subscribeToBooks();
-    bindGlobalEvents();
-    searchInput.addEventListener('input', handleSearch);
-    resetSearchBtn.addEventListener('click', resetSearch);
-    openAddModalBtn.addEventListener('click', openModalForAdd);
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelModalBtn.addEventListener('click', closeModal);
-    saveBookBtn.addEventListener('click', handleSave);
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) closeModal();
+
+  async function returnBook(loanId, bookId) {
+    const loanDoc = await getDoc(doc(db, "borrowings", loanId));
+    if (!loanDoc.exists()) return;
+    const loanData = loanDoc.data();
+    if (loanData.returnDate) {
+      alert("Buku sudah dikembalikan.");
+      return;
+    }
+    const due = new Date(loanData.dueDate);
+    const today = new Date();
+    let fine = 0;
+    if (today > due) fine = 10000; // flat denda 10000
+    const confirmMsg = fine > 0 ? `Buku terlambat! Denda Rp10.000. Lanjutkan pengembalian?` : `Konfirmasi pengembalian buku.`;
+    if (!confirm(confirmMsg)) return;
+    // Update loan
+    await updateDoc(doc(db, "borrowings", loanId), {
+      returnDate: new Date().toISOString().split('T')[0],
+      fine: fine,
+      status: "returned"
     });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
-      if (e.key === 'Escape' && loanModal.classList.contains('active')) closeLoanModal();
+    // Update book availability
+    await updateDoc(doc(db, "books", bookId), { isAvailable: true, borrowerName: "" });
+    alert(fine > 0 ? `Buku dikembalikan dengan denda Rp10.000` : "Buku berhasil dikembalikan.");
+  }
+
+  async function createBorrow(bookId, borrower, borrowDate, dueDate) {
+    const bookRef = doc(db, "books", bookId);
+    const bookSnap = await getDoc(bookRef);
+    if (!bookSnap.exists()) throw new Error("Buku tidak ada");
+    const bookData = bookSnap.data();
+    if (bookData.isAvailable === false) throw new Error("Buku sedang dipinjam");
+    // add loan
+    await addDoc(loansCol, {
+      bookId: bookId,
+      bookTitle: bookData.title,
+      borrowerName: borrower,
+      borrowDate: borrowDate,
+      dueDate: dueDate,
+      returnDate: null,
+      fine: 0,
+      status: "borrowed",
+      createdAt: new Date()
     });
-    
-    // Event modal pinjam
-    closeLoanModalBtn.addEventListener('click', closeLoanModal);
-    cancelLoanBtn.addEventListener('click', closeLoanModal);
-    confirmLoanBtn.addEventListener('click', handleConfirmLoan);
-    loanModal.addEventListener('click', (e) => {
-      if (e.target === loanModal) closeLoanModal();
+    // update book
+    await updateDoc(bookRef, { isAvailable: false, borrowerName: borrower });
+  }
+
+  function openEditBookModal(book) {
+    currentEditId = book.id;
+    bookModalTitle.innerText = "Edit Buku";
+    bookTitle.value = book.title;
+    bookAuthor.value = book.author;
+    bookYear.value = book.year;
+    bookModal.classList.add("active");
+  }
+
+  function closeAllModals() {
+    bookModal.classList.remove("active");
+    borrowModal.classList.remove("active");
+    currentEditId = null;
+    bookTitle.value = "";
+    bookAuthor.value = "";
+    bookYear.value = "";
+  }
+
+  // Real-time subscriptions
+  function subscribeBooks() {
+    onSnapshot(query(booksCol, orderBy("title")), (snapshot) => {
+      books = [];
+      snapshot.forEach(doc => {
+        books.push({ id: doc.id, ...doc.data() });
+      });
+      renderBooks();
+      updateBookSelect(); // update dropdown peminjaman
     });
   }
-  
-  init();
+
+  function subscribeLoans() {
+    onSnapshot(query(loansCol, orderBy("borrowDate", "desc")), (snapshot) => {
+      loans = [];
+      snapshot.forEach(doc => {
+        loans.push({ id: doc.id, ...doc.data() });
+      });
+      renderLoans();
+    });
+  }
+
+  function updateBookSelect() {
+    const availableBooks = books.filter(b => b.isAvailable !== false);
+    bookSelect.innerHTML = '<option value="">-- Pilih Buku --</option>' + availableBooks.map(b => `<option value="${b.id}">${escapeHtml(b.title)} - ${escapeHtml(b.author)}</option>`).join('');
+  }
+
+  // Save book (add / edit)
+  async function saveBook() {
+    const title = bookTitle.value.trim();
+    const author = bookAuthor.value.trim();
+    const year = parseInt(bookYear.value);
+    if (!title || !author || !year) return alert("Isi semua field");
+    if (currentEditId) {
+      await updateDoc(doc(db, "books", currentEditId), { title, author, year });
+    } else {
+      await addDoc(booksCol, { title, author, year, isAvailable: true, borrowerName: "" });
+    }
+    closeAllModals();
+  }
+
+  // Event listeners
+  openAddBookModal.addEventListener("click", () => {
+    currentEditId = null;
+    bookModalTitle.innerText = "Tambah Buku";
+    bookTitle.value = "";
+    bookAuthor.value = "";
+    bookYear.value = "";
+    bookModal.classList.add("active");
+  });
+  saveBookBtn.addEventListener("click", saveBook);
+  closeBookModal.addEventListener("click", closeAllModals);
+  resetBookSearch.addEventListener("click", () => { bookSearchTerm = ""; searchBookInput.value = ""; renderBooks(); });
+  searchBookInput.addEventListener("input", (e) => { bookSearchTerm = e.target.value.toLowerCase(); renderBooks(); });
+  searchLoanInput.addEventListener("input", (e) => { loanSearchTerm = e.target.value.toLowerCase(); renderLoans(); });
+
+  // Borrow modal
+  openBorrowModalBtn.addEventListener("click", () => {
+    if (books.filter(b => b.isAvailable !== false).length === 0) {
+      alert("Tidak ada buku tersedia untuk dipinjam.");
+      return;
+    }
+    updateBookSelect();
+    borrowerName.value = "";
+    borrowDateInput.value = new Date().toISOString().split('T')[0];
+    dueDateInput.value = new Date(Date.now() + 7*86400000).toISOString().split('T')[0];
+    borrowModal.classList.add("active");
+  });
+  closeBorrowModal.addEventListener("click", () => borrowModal.classList.remove("active"));
+  confirmBorrowBtn.addEventListener("click", async () => {
+    const bookId = bookSelect.value;
+    const borrower = borrowerName.value.trim();
+    const borrowDate = borrowDateInput.value;
+    const dueDate = dueDateInput.value;
+    if (!bookId || !borrower || !borrowDate || !dueDate) return alert("Lengkapi data peminjaman!");
+    try {
+      await createBorrow(bookId, borrower, borrowDate, dueDate);
+      alert("Buku berhasil dipinjam!");
+      borrowModal.classList.remove("active");
+    } catch (err) {
+      alert("Gagal meminjam: " + err.message);
+    }
+  });
+
+  // Tab switching
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const tabId = btn.dataset.tab;
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active-panel"));
+      if (tabId === "booksTab") document.getElementById("booksPanel").classList.add("active-panel");
+      else document.getElementById("loansPanel").classList.add("active-panel");
+    });
+  });
+
+  // Helper
+  function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+
+  // Init
+  subscribeBooks();
+  subscribeLoans();
+  // close modals on overlay click
+  window.onclick = (e) => { if (e.target === bookModal) closeAllModals(); if (e.target === borrowModal) borrowModal.classList.remove("active"); };
 </script>
 </body>
 </html>
