@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>📚 PustakaKita | Perpustakaan Digital + Firebase</title>
+  <title>📚 PustakaKita | Perpustakaan Digital + Firebase (Pinjam & Kembali)</title>
   <!-- Google Fonts + Font Awesome 6 -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -141,6 +141,7 @@
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.8rem;
       margin-top: 1rem;
+      margin-bottom: 2rem;
     }
     .book-card {
       background: rgba(255,255,255,0.95);
@@ -192,22 +193,51 @@
       color: #1e4d8f;
       margin-top: 0.4rem;
     }
+    .status-badge {
+      display: inline-block;
+      margin-left: 0.6rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      vertical-align: middle;
+    }
+    .status-available {
+      background: #dff9e6;
+      color: #2b7e3a;
+    }
+    .status-borrowed {
+      background: #ffe8e0;
+      color: #c23d1c;
+    }
+    .borrower-name {
+      display: block;
+      font-size: 0.7rem;
+      margin-top: 6px;
+      color: #c2412c;
+      background: #fff0ed;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      width: fit-content;
+    }
     .card-actions {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       padding: 0.8rem 1.2rem 1.2rem;
       border-top: 1px solid #edf2f7;
-      gap: 10px;
+      gap: 8px;
     }
     .card-actions button {
-      flex: 1;
+      flex: 1 0 auto;
+      min-width: 70px;
       border: none;
       padding: 0.5rem 0;
       border-radius: 30px;
       font-weight: 600;
       cursor: pointer;
       transition: 0.2s;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
@@ -228,6 +258,95 @@
     .btn-delete:hover {
       background: #ffe6e2;
       color: #a1301c;
+    }
+    .btn-borrow {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .btn-borrow:hover {
+      background: #bae6fd;
+    }
+    .btn-return {
+      background: #ffedea;
+      color: #b45329;
+    }
+    .btn-return:hover {
+      background: #ffdad3;
+    }
+    /* Daftar Peminjaman Aktif */
+    .loans-section {
+      background: white;
+      border-radius: 1.8rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0 1rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    .loans-section h3 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1e3c72;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .loans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    .loan-card {
+      background: #fefcf5;
+      border-radius: 1.2rem;
+      padding: 1rem;
+      border-left: 5px solid #f5b042;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+    .loan-info {
+      flex: 2;
+    }
+    .loan-title {
+      font-weight: 700;
+      color: #1f2f47;
+      font-size: 1rem;
+    }
+    .loan-borrower {
+      font-size: 0.85rem;
+      color: #c2412c;
+      margin-top: 4px;
+    }
+    .loan-borrower i {
+      margin-right: 4px;
+    }
+    .btn-return-loan {
+      background: #ffedea;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      font-weight: 600;
+      color: #b45329;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+    .btn-return-loan:hover {
+      background: #ffdad3;
+      transform: scale(0.98);
+    }
+    .empty-loans {
+      text-align: center;
+      color: #6c86a3;
+      padding: 1.5rem;
+      font-style: italic;
     }
     .empty-message {
       text-align: center;
@@ -342,7 +461,7 @@
     }
     footer {
       text-align: center;
-      margin-top: 3rem;
+      margin-top: 2rem;
       font-size: 0.8rem;
       color: #6c86a3;
     }
@@ -350,6 +469,8 @@
       body { padding: 1rem; }
       .hero-section { flex-direction: column; align-items: start; gap: 1rem; }
       .toolbar { flex-direction: column; align-items: stretch; }
+      .card-actions button { font-size: 0.7rem; min-width: 60px; }
+      .loan-card { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
@@ -359,7 +480,7 @@
   <div class="hero-section">
     <div class="brand">
       <h1><i class="fas fa-cloud-upload-alt"></i> PustakaKita <span style="font-size: 0.9rem;">+ Firebase</span></h1>
-      <p>CRUD realtime • Data tersimpan di cloud</p>
+      <p>CRUD realtime + Peminjaman & Pengembalian</p>
     </div>
     <div class="stats-badge" id="totalStats">
       <i class="fas fa-layer-group"></i> <span id="bookCount">0</span> Buku
@@ -378,12 +499,21 @@
   <div id="booksGrid" class="books-grid">
     <div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> Memuat data dari Firebase...</div>
   </div>
+
+  <!-- Daftar Peminjaman Aktif (form untuk melihat nama peminjam & mengembalikan) -->
+  <div id="activeLoansSection" class="loans-section" style="display: none;">
+    <h3><i class="fas fa-hand-holding-heart"></i> 📋 Daftar Peminjaman Aktif</h3>
+    <div id="loansContainer" class="loans-grid">
+      <!-- isi dinamis -->
+    </div>
+  </div>
+
   <footer>
-    <i class="fas fa-database"></i> Terhubung ke Firestore | Perubahan langsung tersimpan
+    <i class="fas fa-database"></i> Terhubung ke Firestore | Buku tersedia bisa dipinjam
   </footer>
 </div>
 
-<!-- Modal Form -->
+<!-- Modal untuk Tambah/Edit Buku -->
 <div id="modalOverlay" class="modal-overlay">
   <div class="modal-container">
     <div class="modal-header">
@@ -409,40 +539,53 @@
   </div>
 </div>
 
+<!-- Modal khusus untuk Peminjaman Buku -->
+<div id="loanModal" class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 id="loanModalTitle">📘 Pinjam Buku</h3>
+      <button class="close-modal" id="closeLoanModalBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="loanBookInfo" style="background:#f0f4fa; padding:0.6rem; border-radius:1rem; margin-bottom:1rem; font-size:0.9rem;">
+      <i class="fas fa-book"></i> <strong id="loanBookTitle">Judul buku</strong>
+    </div>
+    <div class="form-group">
+      <label><i class="fas fa-user"></i> Nama Peminjam</label>
+      <input type="text" id="borrowerNameInput" placeholder="Contoh: Ahmad Wijaya" autocomplete="off">
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-save" id="confirmLoanBtn"><i class="fas fa-check-circle"></i> Konfirmasi Pinjam</button>
+      <button class="btn-cancel" id="cancelLoanBtn">Batal</button>
+    </div>
+  </div>
+</div>
+
 <!-- Firebase SDKs -->
 <script type="module">
   // ======================= KONFIGURASI FIREBASE =======================
-  // 🔴 WAJIB: Ganti dengan konfigurasi proyek Firebase Anda sendiri!
-  // Cara mendapatkan: 
-  // 1. Buat proyek di https://console.firebase.google.com/
-  // 2. Tambahkan aplikasi web, copy objek firebaseConfig di bawah.
-  // 3. Aktifkan Firestore Database (mode test untuk development).
-  // ====================================================================
-      // Konfigurasi Firebase
-    const firebaseConfig = {
-  apiKey: "AIzaSyCfqZD7UZZt-GWmtNhfJyksrv3-8ENRjto",
-  authDomain: "insan-cemerlang-d5574.firebaseapp.com",
-  projectId: "insan-cemerlang-d5574",
-  storageBucket: "insan-cemerlang-d5574.appspot.com",
-  messagingSenderId: "1035937160050",
-  appId: "1:1035937160050:web:6d77d3874c3f78b2811beb",
-  measurementId: "G-EVVQ80Q08C"
-};
-  // ====================================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCfqZD7UZZt-GWmtNhfJyksrv3-8ENRjto",
+    authDomain: "insan-cemerlang-d5574.firebaseapp.com",
+    projectId: "insan-cemerlang-d5574",
+    storageBucket: "insan-cemerlang-d5574.appspot.com",
+    messagingSenderId: "1035937160050",
+    appId: "1:1035937160050:web:6d77d3874c3f78b2811beb",
+    measurementId: "G-EVVQ80Q08C"
+  };
   
-  // Inisialisasi Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const booksCollection = collection(db, "books");
-  const booksQuery = query(booksCollection, orderBy("title", "asc")); // Urut berdasarkan judul
+  const booksQuery = query(booksCollection, orderBy("title", "asc"));
   
   // State
-  let booksList = [];         // array buku dari firebase (dengan id)
-  let currentEditId = null;  // simpan id dokumen yang sedang diedit
+  let booksList = [];
+  let currentEditId = null;
   let searchTerm = "";
+  let pendingLoanBookId = null;
   
   // DOM elements
   const booksGrid = document.getElementById('booksGrid');
@@ -459,7 +602,53 @@
   const bookYearInput = document.getElementById('bookYear');
   const bookCountSpan = document.getElementById('bookCount');
   
-  // Helper render (filter berdasarkan searchTerm)
+  // Elemen modal pinjam
+  const loanModal = document.getElementById('loanModal');
+  const closeLoanModalBtn = document.getElementById('closeLoanModalBtn');
+  const cancelLoanBtn = document.getElementById('cancelLoanBtn');
+  const confirmLoanBtn = document.getElementById('confirmLoanBtn');
+  const borrowerNameInput = document.getElementById('borrowerNameInput');
+  const loanBookTitleSpan = document.getElementById('loanBookTitle');
+  
+  // Elemen daftar peminjaman aktif
+  const activeLoansSection = document.getElementById('activeLoansSection');
+  const loansContainer = document.getElementById('loansContainer');
+  
+  // Helper escape HTML
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+  
+  // Render daftar peminjaman aktif (menampilkan semua buku yang sedang dipinjam)
+  function renderActiveLoans() {
+    const borrowedBooks = booksList.filter(book => book.isAvailable === false);
+    if (borrowedBooks.length === 0) {
+      activeLoansSection.style.display = 'none';
+      return;
+    }
+    activeLoansSection.style.display = 'block';
+    let loansHtml = '';
+    borrowedBooks.forEach(book => {
+      loansHtml += `
+        <div class="loan-card" data-loan-id="${book.id}">
+          <div class="loan-info">
+            <div class="loan-title"><i class="fas fa-book"></i> ${escapeHtml(book.title)}</div>
+            <div class="loan-borrower"><i class="fas fa-user"></i> Dipinjam oleh: ${escapeHtml(book.borrowerName || 'Tidak diketahui')}</div>
+          </div>
+          <button class="btn-return-loan return-from-list-btn" data-id="${book.id}"><i class="fas fa-undo-alt"></i> Kembalikan Buku</button>
+        </div>
+      `;
+    });
+    loansContainer.innerHTML = loansHtml;
+  }
+  
+  // Render buku utama (grid)
   function renderBooks() {
     let filtered = booksList;
     if (searchTerm.trim() !== "") {
@@ -478,19 +667,38 @@
     
     let html = '';
     filtered.forEach(book => {
+      const isAvailable = book.isAvailable !== undefined ? book.isAvailable : true;
+      const borrower = book.borrowerName || '';
+      let statusBadge = '';
+      let borrowerHtml = '';
+      let actionButton = '';
+      
+      if (isAvailable) {
+        statusBadge = '<span class="status-badge status-available"><i class="fas fa-check-circle"></i> Tersedia</span>';
+        actionButton = `<button class="btn-borrow borrow-btn" data-id="${book.id}"><i class="fas fa-hand-holding-heart"></i> Pinjam</button>`;
+      } else {
+        statusBadge = '<span class="status-badge status-borrowed"><i class="fas fa-book-open-reader"></i> Dipinjam</span>';
+        if (borrower) {
+          borrowerHtml = `<div class="borrower-name"><i class="fas fa-user"></i> ${escapeHtml(borrower)}</div>`;
+        }
+        actionButton = `<button class="btn-return return-btn" data-id="${book.id}"><i class="fas fa-undo-alt"></i> Kembalikan</button>`;
+      }
+      
       html += `
         <div class="book-card" data-id="${book.id}">
           <div class="book-cover-icon">
             <i class="fas fa-book"></i>
           </div>
           <div class="book-info">
-            <div class="book-title">${escapeHtml(book.title)}</div>
+            <div class="book-title">${escapeHtml(book.title)} ${statusBadge}</div>
             <div class="book-author"><i class="fas fa-feather-alt"></i> ${escapeHtml(book.author)}</div>
             <div class="book-year"><i class="far fa-calendar-alt"></i> ${book.year}</div>
+            ${borrowerHtml}
           </div>
           <div class="card-actions">
             <button class="btn-edit edit-btn" data-id="${book.id}"><i class="fas fa-pen"></i> Edit</button>
             <button class="btn-delete delete-btn" data-id="${book.id}"><i class="fas fa-trash-alt"></i> Hapus</button>
+            ${actionButton}
           </div>
         </div>
       `;
@@ -498,17 +706,7 @@
     booksGrid.innerHTML = html;
   }
   
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
-  }
-  
-  // Firebase Realtime listener
+  // Subscribe realtime ke Firestore
   function subscribeToBooks() {
     onSnapshot(booksQuery, (snapshot) => {
       booksList = [];
@@ -518,17 +716,21 @@
           id: docSnap.id,
           title: data.title,
           author: data.author,
-          year: data.year
+          year: data.year,
+          isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
+          borrowerName: data.borrowerName || ''
         });
       });
-      renderBooks();  // setiap perubahan data dari firebase, render ulang
+      renderBooks();
+      renderActiveLoans();  // update daftar peminjaman aktif setiap ada perubahan
     }, (error) => {
       console.error("Firestore error:", error);
       booksGrid.innerHTML = `<div class="empty-message"><i class="fas fa-exclamation-triangle"></i> Gagal memuat data. Pastikan konfigurasi Firebase benar dan Firestore sudah diaktifkan.<br><small>${error.message}</small></div>`;
+      activeLoansSection.style.display = 'none';
     });
   }
   
-  // CRUD Operations (async)
+  // --- CRUD Buku ---
   async function addBookToFirebase(title, author, year) {
     if (!title.trim() || !author.trim() || !year) {
       alert("⚠️ Semua field harus diisi!");
@@ -544,6 +746,8 @@
         title: title.trim(),
         author: author.trim(),
         year: yearNum,
+        isAvailable: true,
+        borrowerName: "",
         createdAt: new Date()
       });
       return true;
@@ -590,7 +794,86 @@
     }
   }
   
-  // Modal Handlers
+  // --- Peminjaman & Pengembalian ---
+  async function borrowBook(bookId, borrowerName) {
+    if (!borrowerName.trim()) {
+      alert("Nama peminjam harus diisi!");
+      return false;
+    }
+    const book = booksList.find(b => b.id === bookId);
+    if (!book) {
+      alert("Buku tidak ditemukan.");
+      return false;
+    }
+    if (!book.isAvailable) {
+      alert(`Buku "${book.title}" sedang dipinjam oleh ${book.borrowerName || 'peminjam lain'}.`);
+      return false;
+    }
+    try {
+      const bookRef = doc(db, "books", bookId);
+      await updateDoc(bookRef, {
+        isAvailable: false,
+        borrowerName: borrowerName.trim(),
+        borrowedAt: new Date()
+      });
+      return true;
+    } catch (err) {
+      alert("Gagal meminjam: " + err.message);
+      return false;
+    }
+  }
+  
+  async function returnBook(bookId) {
+    const book = booksList.find(b => b.id === bookId);
+    if (!book) return false;
+    if (book.isAvailable) {
+      alert("Buku ini sedang tidak dipinjam.");
+      return false;
+    }
+    const confirmReturn = confirm(`Kembalikan buku "${book.title}"?`);
+    if (!confirmReturn) return false;
+    try {
+      const bookRef = doc(db, "books", bookId);
+      await updateDoc(bookRef, {
+        isAvailable: true,
+        borrowerName: "",
+        returnedAt: new Date()
+      });
+      return true;
+    } catch (err) {
+      alert("Gagal mengembalikan: " + err.message);
+      return false;
+    }
+  }
+  
+  // --- Modal Pinjam ---
+  function openLoanModal(bookId) {
+    const book = booksList.find(b => b.id === bookId);
+    if (!book) return;
+    if (!book.isAvailable) {
+      alert(`Buku "${book.title}" sedang dipinjam. Tidak bisa dipinjam lagi.`);
+      return;
+    }
+    pendingLoanBookId = bookId;
+    loanBookTitleSpan.innerText = book.title;
+    borrowerNameInput.value = "";
+    loanModal.classList.add("active");
+  }
+  
+  function closeLoanModal() {
+    loanModal.classList.remove("active");
+    pendingLoanBookId = null;
+    borrowerNameInput.value = "";
+  }
+  
+  async function handleConfirmLoan() {
+    if (!pendingLoanBookId) return;
+    const borrower = borrowerNameInput.value.trim();
+    const success = await borrowBook(pendingLoanBookId, borrower);
+    if (success) closeLoanModal();
+  }
+  
+  // --- Modal Tambah/Edit ---
   function openModalForAdd() {
     currentEditId = null;
     modalTitleElem.innerText = "📖 Tambah Buku Baru";
@@ -623,10 +906,8 @@
       const success = await addBookToFirebase(title, author, year);
       if (success) {
         closeModal();
-        // reset search agar buku baru terlihat
         searchTerm = "";
         searchInput.value = "";
-        // data akan otomatis muncul via onSnapshot
       }
     } else {
       const success = await updateBookInFirebase(currentEditId, title, author, year);
@@ -634,8 +915,9 @@
     }
   }
   
-  // Event Delegation untuk Edit & Delete
-  function bindGridEvents() {
+  // Event Delegation untuk semua tombol (termasuk tombol return di daftar peminjaman)
+  function bindGlobalEvents() {
+    // Untuk tombol di grid buku (edit, hapus, pinjam, kembali)
     booksGrid.addEventListener('click', async (e) => {
       const editBtn = e.target.closest('.edit-btn');
       if (editBtn && editBtn.dataset.id) {
@@ -648,15 +930,36 @@
       if (delBtn && delBtn.dataset.id) {
         const bookId = delBtn.dataset.id;
         await deleteBookFromFirebase(bookId);
-        // data terhapus, snapshot akan update otomatis
+        return;
+      }
+      const borrowBtn = e.target.closest('.borrow-btn');
+      if (borrowBtn && borrowBtn.dataset.id) {
+        const bookId = borrowBtn.dataset.id;
+        openLoanModal(bookId);
+        return;
+      }
+      const returnBtn = e.target.closest('.return-btn');
+      if (returnBtn && returnBtn.dataset.id) {
+        const bookId = returnBtn.dataset.id;
+        await returnBook(bookId);
+        return;
+      }
+    });
+    
+    // Event untuk tombol kembali di daftar peminjaman aktif (form pengembalian)
+    loansContainer.addEventListener('click', async (e) => {
+      const returnLoanBtn = e.target.closest('.return-from-list-btn');
+      if (returnLoanBtn && returnLoanBtn.dataset.id) {
+        const bookId = returnLoanBtn.dataset.id;
+        await returnBook(bookId);
       }
     });
   }
   
-  // Search handler
+  // Search handlers
   function handleSearch() {
     searchTerm = searchInput.value;
-    renderBooks();  // filter berdasarkan booksList yang sudah ada
+    renderBooks();
   }
   
   function resetSearch() {
@@ -665,10 +968,10 @@
     renderBooks();
   }
   
-  // Inisialisasi event & Firebase subscribe
+  // Inisialisasi semua event & Firebase
   function init() {
-    subscribeToBooks();       // mulai listen realtime
-    bindGridEvents();
+    subscribeToBooks();
+    bindGlobalEvents();
     searchInput.addEventListener('input', handleSearch);
     resetSearchBtn.addEventListener('click', resetSearch);
     openAddModalBtn.addEventListener('click', openModalForAdd);
@@ -680,10 +983,18 @@
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
+      if (e.key === 'Escape' && loanModal.classList.contains('active')) closeLoanModal();
+    });
+    
+    // Event modal pinjam
+    closeLoanModalBtn.addEventListener('click', closeLoanModal);
+    cancelLoanBtn.addEventListener('click', closeLoanModal);
+    confirmLoanBtn.addEventListener('click', handleConfirmLoan);
+    loanModal.addEventListener('click', (e) => {
+      if (e.target === loanModal) closeLoanModal();
     });
   }
   
-  // Jalankan init
   init();
 </script>
 </body>
