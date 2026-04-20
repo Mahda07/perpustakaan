@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>📚 PustakaKita | Admin & Anggota Perpustakaan</title>
+  <title>📚 PustakaKita | Login & Daftar Admin/Anggota</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -15,7 +15,6 @@
       min-height: 100vh;
       padding: 1rem;
     }
-    /* Auth Container */
     .auth-container {
       display: flex;
       justify-content: center;
@@ -30,13 +29,13 @@
       max-width: 450px;
       box-shadow: 0 25px 40px rgba(0,0,0,0.3);
     }
-    .auth-card h2 { text-align: center; margin-bottom: 1rem; color: #1e3c72; }
-    .role-tabs {
+    .auth-card h2 { text-align: center; margin-bottom: 0.5rem; color: #1e3c72; }
+    .mode-tabs {
       display: flex;
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin: 1rem 0;
     }
-    .role-tab {
+    .mode-tab {
       flex: 1;
       text-align: center;
       padding: 0.5rem;
@@ -45,11 +44,14 @@
       cursor: pointer;
       font-weight: 600;
     }
-    .role-tab.active {
-      background: #ff8c00;
-      color: white;
+    .mode-tab.active { background: #ff8c00; color: white; }
+    .role-select {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
-    .auth-card input {
+    .role-select label { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
+    .auth-card input, .auth-card select {
       width: 100%;
       padding: 0.8rem;
       margin-bottom: 1rem;
@@ -66,16 +68,11 @@
       cursor: pointer;
       color: white;
     }
-    .back-to-login {
-      text-align: center;
-      margin-top: 1rem;
-      cursor: pointer;
-      color: #ff8c00;
-      font-weight: bold;
-    }
     .error-msg { color: red; text-align: center; margin-top: 0.5rem; font-size: 0.8rem; }
+    .info-msg { color: #2563eb; text-align: center; margin-top: 0.5rem; font-size: 0.8rem; }
+    .back-link { text-align: center; margin-top: 1rem; cursor: pointer; color: #ff8c00; font-weight: bold; }
 
-    /* Dashboard Admin & Anggota (gabungan) */
+    /* Dashboard */
     .dashboard-container {
       max-width: 1400px;
       margin: 0 auto;
@@ -129,8 +126,6 @@
       padding: 1.5rem;
       min-height: 500px;
     }
-    .panel { display: none; }
-    .panel.active-panel { display: block; }
     .btn-primary {
       background: #ff8c00;
       border: none;
@@ -139,15 +134,8 @@
       color: white;
       cursor: pointer;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid #e2e8f0;
-    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
     .fine-badge { background: #fee2e2; color: #b91c1c; padding: 0.2rem 0.5rem; border-radius: 1rem; }
     .modal {
       display: none;
@@ -173,6 +161,17 @@
       border-radius: 1rem;
       border: 1px solid #ccc;
     }
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .book-card {
+      background: #fef9f0;
+      border-radius: 1rem;
+      padding: 1rem;
+    }
     @media (max-width: 700px) {
       .menu-card { width: 120px; font-size: 0.8rem; }
       th, td { font-size: 0.7rem; }
@@ -184,18 +183,37 @@
 <div id="authContainer" class="auth-container">
   <div class="auth-card">
     <h2>📚 Perpustakaan Digital</h2>
-    <div class="role-tabs">
-      <div class="role-tab active" data-role="admin">Admin</div>
-      <div class="role-tab" data-role="anggota">Anggota</div>
+    <div class="mode-tabs">
+      <div class="mode-tab active" data-mode="login">Login</div>
+      <div class="mode-tab" data-mode="register">Daftar</div>
     </div>
-    <input type="text" id="loginUsername" placeholder="Username">
-    <input type="password" id="loginPassword" placeholder="Password">
-    <button id="authSubmitBtn">Login</button>
+    <div id="loginForm">
+      <input type="text" id="loginUsername" placeholder="Username">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <div class="role-select" id="loginRoleSelect">
+        <label><input type="radio" name="loginRole" value="admin" checked> Admin</label>
+        <label><input type="radio" name="loginRole" value="anggota"> Anggota</label>
+      </div>
+      <button id="authSubmitBtn">Masuk</button>
+    </div>
+    <div id="registerForm" style="display:none;">
+      <input type="text" id="regUsername" placeholder="Username">
+      <input type="text" id="regFullname" placeholder="Nama Lengkap">
+      <input type="email" id="regEmail" placeholder="Email">
+      <input type="password" id="regPassword" placeholder="Password">
+      <input type="password" id="regConfirmPassword" placeholder="Konfirmasi Password">
+      <div class="role-select">
+        <label><input type="radio" name="regRole" value="admin"> Daftar sebagai Admin</label>
+        <label><input type="radio" name="regRole" value="anggota" checked> Daftar sebagai Anggota</label>
+      </div>
+      <button id="registerBtn">Daftar</button>
+    </div>
     <div id="authError" class="error-msg"></div>
+    <div id="authInfo" class="info-msg"></div>
   </div>
 </div>
 
-<!-- Dashboard Container (akan diisi sesuai role) -->
+<!-- Dashboard Container -->
 <div id="dashboardContainer" style="display: none;">
   <div class="dashboard-container">
     <div class="header">
@@ -205,14 +223,12 @@
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </div>
     </div>
-    <!-- Menu Dinamis (akan diisi JS) -->
     <div id="menuContainer" class="menu-grid"></div>
-    <!-- Konten Dinamis -->
     <div class="content-panel" id="contentPanel"></div>
   </div>
 </div>
 
-<!-- Modal Umum untuk CRUD -->
+<!-- Modal Umum -->
 <div id="genericModal" class="modal">
   <div class="modal-content">
     <h3 id="modalTitle">Form</h3>
@@ -246,19 +262,28 @@
   const usersCol = collection(db, "users");
 
   let currentUser = null;
-  let currentRole = null; // "admin" atau "anggota"
+  let currentRole = null;
   let currentUserData = null;
   let books = [];
   let loans = [];
-  let members = []; // daftar anggota (role = anggota)
+  let members = [];
 
-  // DOM
+  // DOM Auth
   const authContainer = document.getElementById("authContainer");
   const dashboardContainer = document.getElementById("dashboardContainer");
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
   const loginUsername = document.getElementById("loginUsername");
   const loginPassword = document.getElementById("loginPassword");
   const authSubmitBtn = document.getElementById("authSubmitBtn");
+  const registerBtn = document.getElementById("registerBtn");
+  const regUsername = document.getElementById("regUsername");
+  const regFullname = document.getElementById("regFullname");
+  const regEmail = document.getElementById("regEmail");
+  const regPassword = document.getElementById("regPassword");
+  const regConfirmPassword = document.getElementById("regConfirmPassword");
   const authError = document.getElementById("authError");
+  const authInfo = document.getElementById("authInfo");
   const userNameDisplay = document.getElementById("userNameDisplay");
   const userRoleDisplay = document.getElementById("userRoleDisplay");
   const logoutBtn = document.getElementById("logoutBtn");
@@ -271,15 +296,38 @@
   const modalSaveBtn = document.getElementById("modalSaveBtn");
   const modalCloseBtn = document.getElementById("modalCloseBtn");
 
-  let selectedRoleTab = "admin"; // default tab login
   let currentMenu = "";
+  let selectedLoginRole = "admin";
 
-  // Helper
   function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
 
-  // --- LOGIN dengan username & role ---
+  // Registrasi user baru
+  async function registerUser(username, fullname, email, password, role) {
+    // Cek username unik
+    const usernameQuery = query(usersCol, where("username", "==", username));
+    const existing = await getDocs(usernameQuery);
+    if (!existing.empty) throw new Error("Username sudah digunakan");
+    // Cek email unik
+    const emailQuery = query(usersCol, where("email", "==", email));
+    const existingEmail = await getDocs(emailQuery);
+    if (!existingEmail.empty) throw new Error("Email sudah terdaftar");
+    // Jika role admin, cek apakah sudah ada admin (hanya satu admin)
+    if (role === "admin") {
+      const adminQuery = query(usersCol, where("role", "==", "admin"));
+      const adminSnap = await getDocs(adminQuery);
+      if (!adminSnap.empty) throw new Error("Admin sudah ada, tidak bisa mendaftar admin lagi");
+    }
+    // Buat akun di Firebase Auth
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    // Simpan ke Firestore
+    await setDoc(doc(db, "users", userCred.user.uid), {
+      username, fullname, email, role, createdAt: new Date()
+    });
+    return userCred.user;
+  }
+
+  // Login dengan username dan role
   async function loginWithUsername(username, password, role) {
-    // cari user di Firestore berdasarkan username dan role
     const q = query(usersCol, where("username", "==", username), where("role", "==", role));
     const snap = await getDocs(q);
     if (snap.empty) throw new Error("Username atau role tidak ditemukan");
@@ -289,27 +337,7 @@
     return userDoc.data();
   }
 
-  // Registrasi otomatis untuk admin pertama kali (jika belum ada)
-  async function ensureAdminExists() {
-    const adminQuery = query(usersCol, where("role", "==", "admin"));
-    const adminSnap = await getDocs(adminQuery);
-    if (adminSnap.empty) {
-      // buat admin default: username admin, password admin123
-      const adminEmail = "admin@pustakalokal.id";
-      try {
-        const userCred = await createUserWithEmailAndPassword(auth, adminEmail, "admin123");
-        await setDoc(doc(db, "users", userCred.user.uid), {
-          username: "admin",
-          email: adminEmail,
-          role: "admin",
-          fullname: "Administrator"
-        });
-        console.log("Admin default dibuat: username admin, password admin123");
-      } catch(e) { console.log("Admin mungkin sudah ada"); }
-    }
-  }
-
-  // --- RENDER DASHBOARD ADMIN ---
+  // ======================= DASHBOARD ADMIN =======================
   function renderAdminDashboard() {
     const menus = [
       { id: "manageBooks", label: "📚 Kelola Buku", icon: "fas fa-book" },
@@ -327,11 +355,9 @@
         else if (currentMenu === "manageMembers") renderManageMembers();
       });
     });
-    // default buka kelola buku
     document.querySelector(".menu-card").click();
   }
 
-  // Kelola Buku (CRUD)
   async function renderManageBooks() {
     contentPanel.innerHTML = `<div><button class="btn-primary" id="addBookBtn">+ Tambah Buku</button><div id="booksListAdmin"></div></div>`;
     const booksDiv = document.getElementById("booksListAdmin");
@@ -340,24 +366,21 @@
       booksDiv.innerHTML = `
         <table style="margin-top:1rem">
           <thead><tr><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Status</th><th>Aksi</th></tr></thead>
-          <tbody>
-            ${books.map(book => `
-              <tr>
-                <td>${escapeHtml(book.title)}</td>
-                <td>${escapeHtml(book.author)}</td>
-                <td>${book.year}</td>
-                <td>${book.isAvailable ? 'Tersedia' : 'Dipinjam'}</td>
-                <td><button class="editBookBtn" data-id="${book.id}">Edit</button> <button class="deleteBookBtn" data-id="${book.id}">Hapus</button></td>
-              </tr>
-            `).join('')}
-          </tbody>
+          <tbody>${books.map(book => `
+            <tr>
+              <td>${escapeHtml(book.title)}</td>
+              <td>${escapeHtml(book.author)}</td>
+              <td>${book.year}</td>
+              <td>${book.isAvailable ? 'Tersedia' : 'Dipinjam'}</td>
+              <td><button class="editBookBtn" data-id="${book.id}">Edit</button> <button class="deleteBookBtn" data-id="${book.id}">Hapus</button></td>
+            </tr>
+          `).join('')}</tbody>
         </table>
       `;
       document.querySelectorAll(".editBookBtn").forEach(btn => btn.addEventListener("click", () => openBookModal(btn.dataset.id)));
       document.querySelectorAll(".deleteBookBtn").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Hapus buku?")) await deleteDoc(doc(db, "books", btn.dataset.id)); }));
     });
     document.getElementById("addBookBtn").onclick = () => openBookModal(null);
-    return unsubscribe;
   }
 
   function openBookModal(bookId) {
@@ -385,7 +408,6 @@
     modalCloseBtn.onclick = () => genericModal.style.display = "none";
   }
 
-  // Kelola Transaksi (CRUD peminjaman)
   async function renderManageTransactions() {
     contentPanel.innerHTML = `<div><button class="btn-primary" id="addTransactionBtn">+ Pinjam Buku (Manual)</button><input type="text" id="searchTrans" placeholder="Cari peminjam/buku" style="margin-left:1rem; padding:0.3rem;"><div id="transactionsList"></div></div>`;
     const transDiv = document.getElementById("transactionsList");
@@ -393,46 +415,40 @@
     const unsubscribe = onSnapshot(query(loansCol, orderBy("borrowDate", "desc")), async (snap) => {
       loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       let filtered = loans;
-      if (searchInput) {
+      if (searchInput && searchInput.value) {
         const term = searchInput.value.toLowerCase();
         filtered = loans.filter(l => l.borrowerName.toLowerCase().includes(term) || (l.bookTitle || "").toLowerCase().includes(term));
       }
       transDiv.innerHTML = `
         <table style="margin-top:1rem">
           <thead><tr><th>Buku</th><th>Peminjam</th><th>Tgl Pinjam</th><th>Jatuh Tempo</th><th>Status</th><th>Denda</th><th>Aksi</th></tr></thead>
-          <tbody>
-            ${filtered.map(loan => {
-              const isReturned = !!loan.returnDate;
-              let fineDisplay = "-";
-              if (!isReturned) {
-                const today = new Date();
-                const due = new Date(loan.dueDate);
-                if (today > due) fineDisplay = "<span class='fine-badge'>Rp10.000 (terlambat)</span>";
-              } else if (loan.fine) fineDisplay = `<span class='fine-badge'>Rp${loan.fine}</span>`;
-              return `
-                <tr>
-                  <td>${escapeHtml(loan.bookTitle)}</td>
-                  <td>${escapeHtml(loan.borrowerName)}</td>
-                  <td>${loan.borrowDate}</td>
-                  <td>${loan.dueDate}</td>
-                  <td>${isReturned ? "Dikembalikan" : "Dipinjam"}</td>
-                  <td>${fineDisplay}</td>
-                  <td>
-                    ${!isReturned ? `<button class="returnTransBtn" data-id="${loan.id}" data-bookid="${loan.bookId}">Kembalikan</button>` : ''}
-                    <button class="deleteTransBtn" data-id="${loan.id}">Hapus</button>
-                  </td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
+          <tbody>${filtered.map(loan => {
+            const isReturned = !!loan.returnDate;
+            let fineDisplay = "-";
+            if (!isReturned) {
+              const today = new Date();
+              const due = new Date(loan.dueDate);
+              if (today > due) fineDisplay = "<span class='fine-badge'>Rp10.000 (terlambat)</span>";
+            } else if (loan.fine) fineDisplay = `<span class='fine-badge'>Rp${loan.fine}</span>`;
+            return `
+              <tr>
+                <td>${escapeHtml(loan.bookTitle)}</td>
+                <td>${escapeHtml(loan.borrowerName)}</td>
+                <td>${loan.borrowDate}</td>
+                <td>${loan.dueDate}</td>
+                <td>${isReturned ? "Dikembalikan" : "Dipinjam"}</td>
+                <td>${fineDisplay}</td>
+                <td>
+                  ${!isReturned ? `<button class="returnTransBtn" data-id="${loan.id}" data-bookid="${loan.bookId}">Kembalikan</button>` : ''}
+                  <button class="deleteTransBtn" data-id="${loan.id}">Hapus</button>
+                </td>
+              </tr>
+            `;
+          }).join('')}</tbody>
         </table>
       `;
-      document.querySelectorAll(".returnTransBtn").forEach(btn => btn.addEventListener("click", async () => {
-        await returnBook(btn.dataset.id, btn.dataset.bookid);
-      }));
-      document.querySelectorAll(".deleteTransBtn").forEach(btn => btn.addEventListener("click", async () => {
-        if(confirm("Hapus transaksi ini?")) await deleteDoc(doc(db, "borrowings", btn.dataset.id));
-      }));
+      document.querySelectorAll(".returnTransBtn").forEach(btn => btn.addEventListener("click", async () => { await returnBook(btn.dataset.id, btn.dataset.bookid); }));
+      document.querySelectorAll(".deleteTransBtn").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Hapus transaksi?")) await deleteDoc(doc(db, "borrowings", btn.dataset.id)); }));
     });
     if (searchInput) searchInput.addEventListener("input", () => {});
     document.getElementById("addTransactionBtn").onclick = () => openManualBorrowModal();
@@ -456,7 +472,6 @@
 
   function openManualBorrowModal() {
     modalTitle.innerText = "Pinjam Buku (Manual)";
-    // ambil daftar buku tersedia
     const availableBooks = books.filter(b => b.isAvailable);
     modalBody.innerHTML = `
       <select id="bookSelect"><option value="">Pilih Buku</option>${availableBooks.map(b => `<option value="${b.id}">${escapeHtml(b.title)}</option>`).join('')}</select>
@@ -486,7 +501,6 @@
     modalCloseBtn.onclick = () => genericModal.style.display = "none";
   }
 
-  // Kelola Anggota (CRUD)
   async function renderManageMembers() {
     contentPanel.innerHTML = `<div><button class="btn-primary" id="addMemberBtn">+ Tambah Anggota</button><div id="membersList"></div></div>`;
     const membersDiv = document.getElementById("membersList");
@@ -496,25 +510,20 @@
       membersDiv.innerHTML = `
         <table style="margin-top:1rem">
           <thead><tr><th>Username</th><th>Nama Lengkap</th><th>Email</th><th>Aksi</th></tr></thead>
-          <tbody>
-            ${members.map(m => `
-              <tr>
-                <td>${escapeHtml(m.username)}</td>
-                <td>${escapeHtml(m.fullname || '')}</td>
-                <td>${escapeHtml(m.email)}</td>
-                <td><button class="editMemberBtn" data-id="${m.id}">Edit</button> <button class="deleteMemberBtn" data-id="${m.id}" data-email="${m.email}">Hapus</button></td>
-              </tr>
-            `).join('')}
-          </tbody>
+          <tbody>${members.map(m => `
+            <tr>
+              <td>${escapeHtml(m.username)}</td>
+              <td>${escapeHtml(m.fullname || '')}</td>
+              <td>${escapeHtml(m.email)}</td>
+              <td><button class="editMemberBtn" data-id="${m.id}">Edit</button> <button class="deleteMemberBtn" data-id="${m.id}" data-email="${m.email}">Hapus</button></td>
+            </tr>
+          `).join('')}</tbody>
         </table>
       `;
       document.querySelectorAll(".editMemberBtn").forEach(btn => btn.addEventListener("click", () => openMemberModal(btn.dataset.id)));
       document.querySelectorAll(".deleteMemberBtn").forEach(btn => btn.addEventListener("click", async () => {
-        if(confirm("Hapus anggota? Akun Firebase Auth juga akan dihapus (jika ada).")) {
-          const email = btn.dataset.email;
-          // hapus dari Firestore
+        if(confirm("Hapus anggota?")) {
           await deleteDoc(doc(db, "users", btn.dataset.id));
-          // (Opsional) hapus user dari Auth - butuh fungsi admin, skip dulu
           alert("Anggota dihapus dari database.");
         }
       }));
@@ -537,21 +546,14 @@
       const fullname = document.getElementById("memberFullname").value.trim();
       const email = document.getElementById("memberEmail").value.trim();
       const password = document.getElementById("memberPassword").value;
-      if (!username || !fullname || !email) return alert("Isi semua data (kecuali password opsional)");
+      if (!username || !fullname || !email) return alert("Isi semua data");
       if (memberId) {
-        // update data di Firestore
         await updateDoc(doc(db, "users", memberId), { fullname, email });
-        if (password) {
-          // update password di Auth (perlu re-authenticate, untuk kemudahan skip)
-          alert("Ubah password tidak dapat dilakukan dari sini. Silakan gunakan reset password.");
-        }
+        if (password) alert("Ubah password tidak dapat dari sini.");
       } else {
-        // buat akun baru di Auth
         try {
           const userCred = await createUserWithEmailAndPassword(auth, email, password);
-          await setDoc(doc(db, "users", userCred.user.uid), {
-            username, fullname, email, role: "anggota"
-          });
+          await setDoc(doc(db, "users", userCred.user.uid), { username, fullname, email, role: "anggota" });
           alert("Anggota berhasil ditambahkan");
         } catch(err) { alert("Gagal: " + err.message); }
       }
@@ -560,7 +562,7 @@
     modalCloseBtn.onclick = () => genericModal.style.display = "none";
   }
 
-  // --- DASHBOARD ANGGOTA (sederhana: pinjam dan kembali) ---
+  // ======================= DASHBOARD ANGGOTA =======================
   function renderAnggotaDashboard() {
     const menus = [
       { id: "pinjam", label: "📖 Peminjaman Buku", icon: "fas fa-hand-holding-heart" },
@@ -635,20 +637,18 @@
       loansDiv.innerHTML = `
         <table>
           <thead><tr><th>Buku</th><th>Tgl Pinjam</th><th>Jatuh Tempo</th><th>Denda</th><th>Aksi</th></tr></thead>
-          <tbody>
-            ${myLoans.map(loan => {
-              const due = new Date(loan.dueDate);
-              const today = new Date();
-              let fine = today > due ? "Rp10.000" : "-";
-              return `<tr>
-                <td>${escapeHtml(loan.bookTitle)}</td>
-                <td>${loan.borrowDate}</td>
-                <td>${loan.dueDate}</td>
-                <td>${fine}</td>
-                <td><button class="returnAnggotaBtn" data-id="${loan.id}" data-bookid="${loan.bookId}">Kembalikan</button></td>
-              </tr>`;
-            }).join('')}
-          </tbody>
+          <tbody>${myLoans.map(loan => {
+            const due = new Date(loan.dueDate);
+            const today = new Date();
+            let fine = today > due ? "Rp10.000" : "-";
+            return `<tr>
+              <td>${escapeHtml(loan.bookTitle)}</td>
+              <td>${loan.borrowDate}</td>
+              <td>${loan.dueDate}</td>
+              <td>${fine}</td>
+              <td><button class="returnAnggotaBtn" data-id="${loan.id}" data-bookid="${loan.bookId}">Kembalikan</button></td>
+            </tr>`;
+          }).join('')}</tbody>
         </table>
       `;
       document.querySelectorAll(".returnAnggotaBtn").forEach(btn => btn.addEventListener("click", async () => {
@@ -659,7 +659,7 @@
     });
   }
 
-  // --- AUTH STATE ---
+  // ======================= AUTH STATE (tanpa admin default otomatis) =======================
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -674,42 +674,78 @@
         if (currentRole === "admin") renderAdminDashboard();
         else renderAnggotaDashboard();
       } else {
-        // jika tidak ada role, anggap error
         await signOut(auth);
-        alert("Akun tidak valid");
+        alert("Akun tidak valid, silakan registrasi ulang.");
       }
     } else {
       authContainer.style.display = "flex";
       dashboardContainer.style.display = "none";
       currentUser = null;
       currentRole = null;
-      ensureAdminExists(); // pastikan admin default ada
+      // Tampilkan pesan info jika Firebase Auth Email/Password belum diaktifkan
+      authInfo.innerText = "Pastikan metode login Email/Password sudah diaktifkan di Firebase Console.";
     }
   });
 
-  // Login handler
-  let selectedRole = "admin";
-  document.querySelectorAll(".role-tab").forEach(tab => {
+  // Toggle Login/Register
+  const modeTabs = document.querySelectorAll(".mode-tab");
+  modeTabs.forEach(tab => {
     tab.addEventListener("click", () => {
-      document.querySelectorAll(".role-tab").forEach(t => t.classList.remove("active"));
+      modeTabs.forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
-      selectedRole = tab.dataset.role;
+      const mode = tab.dataset.mode;
+      if (mode === "login") {
+        loginForm.style.display = "block";
+        registerForm.style.display = "none";
+      } else {
+        loginForm.style.display = "none";
+        registerForm.style.display = "block";
+      }
+      authError.innerText = "";
     });
   });
+
+  // Login radio role
+  document.querySelectorAll("input[name='loginRole']").forEach(radio => {
+    radio.addEventListener("change", (e) => { selectedLoginRole = e.target.value; });
+  });
+
   authSubmitBtn.addEventListener("click", async () => {
     const username = loginUsername.value.trim();
     const password = loginPassword.value;
     if (!username || !password) return authError.innerText = "Isi username & password";
     try {
-      if (selectedRole === "admin") {
-        await loginWithUsername(username, password, "admin");
-      } else {
-        await loginWithUsername(username, password, "anggota");
-      }
+      await loginWithUsername(username, password, selectedLoginRole);
     } catch (err) {
       authError.innerText = err.message;
     }
   });
+
+  registerBtn.addEventListener("click", async () => {
+    const username = regUsername.value.trim();
+    const fullname = regFullname.value.trim();
+    const email = regEmail.value.trim();
+    const password = regPassword.value;
+    const confirm = regConfirmPassword.value;
+    const role = document.querySelector("input[name='regRole']:checked").value;
+    if (!username || !fullname || !email || !password) return authError.innerText = "Semua field harus diisi";
+    if (password !== confirm) return authError.innerText = "Password tidak cocok";
+    try {
+      await registerUser(username, fullname, email, password, role);
+      authError.innerText = "Pendaftaran berhasil! Silakan login.";
+      // Switch ke login
+      modeTabs[0].click();
+      // Kosongkan form
+      regUsername.value = "";
+      regFullname.value = "";
+      regEmail.value = "";
+      regPassword.value = "";
+      regConfirmPassword.value = "";
+    } catch (err) {
+      authError.innerText = err.message;
+    }
+  });
+
   logoutBtn.addEventListener("click", () => signOut(auth));
   backToLoginBtn.addEventListener("click", () => signOut(auth));
 </script>
