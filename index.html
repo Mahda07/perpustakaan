@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>📚 PustakaKita| </title>
+  <!-- Google Fonts + Font Awesome 6 -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f4f9ff 0%, #e9f0fa 100%);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
+
+    .library-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .hero-section {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 2rem;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      border: 1px solid rgba(255,255,255,0.8);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1E3C72, #2A5298);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+    }
+    .brand p {
+      color: #2c3e66;
+      font-weight: 500;
+      margin-top: 0.3rem;
+      font-size: 0.9rem;
+    }
+    .stats-badge {
+      background: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      font-weight: 600;
+      color: #1e3c72;
+    }
+    .stats-badge i {
+      margin-right: 8px;
+      color: #f5b042;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .search-wrapper {
+      flex: 2;
+      min-width: 220px;
+      display: flex;
+      gap: 0.6rem;
+      background: white;
+      padding: 0.3rem 0.3rem 0.3rem 1rem;
+      border-radius: 60px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.03);
+      border: 1px solid #e2edff;
+    }
+    .search-wrapper i {
+      color: #8ba0bc;
+      align-self: center;
+    }
+    .search-wrapper input {
+      flex: 1;
+      border: none;
+      padding: 0.8rem 0;
+      font-size: 0.95rem;
+      background: transparent;
+      outline: none;
+      font-weight: 500;
+    }
+    .search-wrapper button {
+      background: #2a5298;
+      border: none;
+      color: white;
+      border-radius: 40px;
+      padding: 0 1.2rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .search-wrapper button:hover {
+      background: #1e3c72;
+    }
+    .btn-primary {
+      background: linear-gradient(100deg, #1e3c72, #2a5298);
+      border: none;
+      padding: 0.8rem 1.6rem;
+      border-radius: 40px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 14px rgba(30,60,114,0.25);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(100deg, #102b4e, #1f3f72);
+      box-shadow: 0 12px 20px rgba(30,60,114,0.3);
+    }
+
+    /* Grid Buku */
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.8rem;
+      margin-top: 1rem;
+    }
+    .book-card {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(2px);
+      border-radius: 1.5rem;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      box-shadow: 0 12px 24px -12px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    .book-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 36px -14px rgba(0, 0, 0, 0.2);
+      background: white;
+    }
+    .book-cover-icon {
+      background: linear-gradient(130deg, #eef3fc, #dde6f2);
+      text-align: center;
+      padding: 1.5rem 0;
+      font-size: 3.2rem;
+      color: #2a5298;
+    }
+    .book-info {
+      padding: 1.2rem 1.2rem 1rem;
+    }
+    .book-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1f2f47;
+      margin-bottom: 0.4rem;
+      line-height: 1.3;
+    }
+    .book-author {
+      color: #4a627a;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .book-year {
+      display: inline-block;
+      background: #ecf3fa;
+      padding: 0.2rem 0.7rem;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #1e4d8f;
+      margin-top: 0.4rem;
+    }
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.8rem 1.2rem 1.2rem;
+      border-top: 1px solid #edf2f7;
+      gap: 10px;
+    }
+    .card-actions button {
+      flex: 1;
+      border: none;
+      padding: 0.5rem 0;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+    .btn-edit {
+      background: #eff6ff;
+      color: #2c6e9e;
+    }
+    .btn-edit:hover {
+      background: #e0edfe;
+      color: #1a4a70;
+    }
+    .btn-delete {
+      background: #fff4f2;
+      color: #c2412c;
+    }
+    .btn-delete:hover {
+      background: #ffe6e2;
+      color: #a1301c;
+    }
+    .empty-message {
+      text-align: center;
+      grid-column: 1 / -1;
+      background: white;
+      padding: 3rem;
+      border-radius: 2rem;
+      color: #5f7f9e;
+    }
+    .loading-spinner {
+      text-align: center;
+      grid-column: 1 / -1;
+      padding: 3rem;
+      font-size: 1.2rem;
+      color: #2a5298;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.2s ease;
+      z-index: 1000;
+    }
+    .modal-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+    .modal-container {
+      background: white;
+      max-width: 480px;
+      width: 90%;
+      border-radius: 2rem;
+      padding: 1.8rem 1.8rem 2rem;
+      box-shadow: 0 30px 40px rgba(0,0,0,0.2);
+      transform: scale(0.96);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.active .modal-container {
+      transform: scale(1);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .modal-header h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e3c72;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: #8caccc;
+    }
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #2c3e66;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 1.2rem;
+      font-size: 1rem;
+      transition: 0.2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: #2a5298;
+      box-shadow: 0 0 0 3px rgba(42,82,152,0.2);
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 1.8rem;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 0.8rem;
+      border-radius: 40px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-save {
+      background: #2a5298;
+      color: white;
+    }
+    .btn-cancel {
+      background: #f1f5f9;
+      color: #475569;
+    }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.8rem;
+      color: #6c86a3;
+    }
+    @media (max-width: 640px) {
+      body { padding: 1rem; }
+      .hero-section { flex-direction: column; align-items: start; gap: 1rem; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="library-container">
+  <div class="hero-section">
+    <div class="brand">
+      <h1><i class="fas fa-cloud-upload-alt"></i> PustakaKita <span style="font-size: 0.9rem;">+ Firebase</span></h1>
+      <p>CRUD realtime • Data tersimpan di cloud</p>
+    </div>
+    <div class="stats-badge" id="totalStats">
+      <i class="fas fa-layer-group"></i> <span id="bookCount">0</span> Buku
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrapper">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Cari judul atau penulis..." autocomplete="off">
+      <button id="resetSearchBtn"><i class="fas fa-times"></i> Reset</button>
+    </div>
+    <button id="openAddModalBtn" class="btn-primary"><i class="fas fa-plus-circle"></i> Tambah Buku</button>
+  </div>
+
+  <div id="booksGrid" class="books-grid">
+    <div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> Memuat data dari Firebase...</div>
+  </div>
+  <footer>
+    <i class="fas fa-database"></i> Terhubung ke Firestore | Perubahan langsung tersimpan
+  </footer>
+</div>
+
+<!-- Modal Form -->
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal-ner">
+    <div class="modal-header">
+      <h3 id="modalTitle">Tambah Buku</h3>
+      <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="form-group">
+      <label><i class="fas fa-heading"></i> Judul Buku</label>
+      <input type="text" id="bookTitle" placeholder="Misal: Laskar Pelangi" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label><i class="fas fa-user-pen"></i> Penulis</label>
+      <input type="text" id="bookAuthor" placeholder="Nama penulis" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label><i class="fas fa-calendar-alt"></i> Tahun Terbit</label>
+      <input type="number" id="bookYear" placeholder="2024" min="1000" max="2030">
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-save" id="saveBookBtn"><i class="fas fa-save"></i> Simpan</button>
+      <button class="btn-cancel" id="cancelModalBtn">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+  // ======================= KONFIGURASI FIREBASE =======================
+  // 🔴 WAJIB: Ganti dengan konfigurasi proyek Firebase Anda sendiri!
+  // Cara mendapatkan: 
+  // 1. Buat proyek di https://console.firebase.google.com/
+  // 2. Tambahkan aplikasi web, copy objek firebaseConfig di bawah.
+  // 3. Aktifkan Firestore Database (mode test untuk development).
+  // ====================================================================
+      // Konfigurasi Firebase
+    const firebaseConfig = {
+  apiKey: "AIzaSyCfqZD7UZZt-GWmtNhfJyksrv3-8ENRjto",
+  authDomain: "insan-cemerlang-d5574.firebaseapp.com",
+  projectId: "insan-cemerlang-d5574",
+  storageBucket: "insan-cemerlang-d5574.appspot.com",
+  messagingSenderId: "1035937160050",
+  appId: "1:1035937160050:web:6d77d3874c3f78b2811beb",
+  measurementId: "G-EVVQ80Q08C"
+};
+  // ====================================================================
+  
+  // Inisialisasi Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const booksCollection = collection(db, "books");
+  const booksQuery = query(booksCollection, orderBy("title", "asc")); // Urut berdasarkan judul
+  
+  // State
+  let booksList = [];         // array buku dari firebase (dengan id)
+  let currentEditId = null;  // simpan id dokumen yang sedang diedit
+  let searchTerm = "";
+  
+  // DOM elements
+  const booksGrid = document.getElementById('booksGrid');
+  const searchInput = document.getElementById('searchInput');
+  const resetSearchBtn = document.getElementById('resetSearchBtn');
+  const openAddModalBtn = document.getElementById('openAddModalBtn');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const cancelModalBtn = document.getElementById('cancelModalBtn');
+  const saveBookBtn = document.getElementById('saveBookBtn');
+  const modalTitleElem = document.getElementById('modalTitle');
+  const bookTitleInput = document.getElementById('bookTitle');
+  const bookAuthorInput = document.getElementById('bookAuthor');
+  const bookYearInput = document.getElementById('bookYear');
+  const bookCountSpan = document.getElementById('bookCount');
+  
+  // Helper render (filter berdasarkan searchTerm)
+  function renderBooks() {
+    let filtered = booksList;
+    if (searchTerm.trim() !== "") {
+      const term = searchTerm.trim().toLowerCase();
+      filtered = booksList.filter(book => 
+        book.title.toLowerCase().includes(term) || 
+        book.author.toLowerCase().includes(term)
+      );
+    }
+    bookCountSpan.innerText = filtered.length;
+    
+    if (filtered.length === 0) {
+      booksGrid.innerHTML = `<div class="empty-message"><i class="fas fa-book-open" style="font-size: 3rem; opacity: 0.5;"></i><p style="margin-top: 1rem;">📭 Tidak ada buku.<br>Tambahkan koleksi baru atau ubah kata kunci.</p></div>`;
+      return;
+    }
+    
+    let html = '';
+    filtered.forEach(book => {
+      html += `
+        <div class="book-card" data-id="${book.id}">
+          <div class="book-cover-icon">
+            <i class="fas fa-book"></i>
+          </div>
+          <div class="book-info">
+            <div class="book-title">${escapeHtml(book.title)}</div>
+            <div class="book-author"><i class="fas fa-feather-alt"></i> ${escapeHtml(book.author)}</div>
+            <div class="book-year"><i class="far fa-calendar-alt"></i> ${book.year}</div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-edit edit-btn" data-id="${book.id}"><i class="fas fa-pen"></i> Edit</button>
+            <button class="btn-delete delete-btn" data-id="${book.id}"><i class="fas fa-trash-alt"></i> Hapus</button>
+          </div>
+        </div>
+      `;
+    });
+    booksGrid.innerHTML = html;
+  }
+  
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+  
+  // Firebase Realtime listener
+  function subscribeToBooks() {
+    onSnapshot(booksQuery, (snapshot) => {
+      booksList = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        booksList.push({
+          id: docSnap.id,
+          title: data.title,
+          author: data.author,
+          year: data.year
+        });
+      });
+      renderBooks();  // setiap perubahan data dari firebase, render ulang
+    }, (error) => {
+      console.error("Firestore error:", error);
+      booksGrid.innerHTML = `<div class="empty-message"><i class="fas fa-exclamation-triangle"></i> Gagal memuat data. Pastikan konfigurasi Firebase benar dan Firestore sudah diaktifkan.<br><small>${error.message}</small></div>`;
+    });
+  }
+  
+  // CRUD Operations (async)
+  async function addBookToFirebase(title, author, year) {
+    if (!title.trim() || !author.trim() || !year) {
+      alert("⚠️ Semua field harus diisi!");
+      return false;
+    }
+    const yearNum = parseInt(year);
+    if (isNaN(yearNum) || yearNum < 1000 || yearNum > new Date().getFullYear() + 5) {
+      alert("📅 Tahun terbit tidak valid (1000 - 2030)");
+      return false;
+    }
+    try {
+      await addDoc(booksCollection, {
+        title: title.trim(),
+        author: author.trim(),
+        year: yearNum,
+        createdAt: new Date()
+      });
+      return true;
+    } catch (err) {
+      alert("Gagal menambahkan: " + err.message);
+      return false;
+    }
+  }
+  
+  async function updateBookInFirebase(id, title, author, year) {
+    if (!title.trim() || !author.trim() || !year) {
+      alert("⚠️ Field tidak boleh kosong!");
+      return false;
+    }
+    const yearNum = parseInt(year);
+    if (isNaN(yearNum) || yearNum < 1000 || yearNum > new Date().getFullYear() + 5) {
+      alert("📅 Tahun terbit tidak valid");
+      return false;
+    }
+    try {
+      const bookRef = doc(db, "books", id);
+      await updateDoc(bookRef, {
+        title: title.trim(),
+        author: author.trim(),
+        year: yearNum
+      });
+      return true;
+    } catch (err) {
+      alert("Gagal update: " + err.message);
+      return false;
+    }
+  }
+  
+  async function deleteBookFromFirebase(id) {
+    const confirmDel = confirm("⚠️ Yakin ingin menghapus buku ini secara permanen?");
+    if (!confirmDel) return false;
+    try {
+      const bookRef = doc(db, "books", id);
+      await deleteDoc(bookRef);
+      return true;
+    } catch (err) {
+      alert("Gagal hapus: " + err.message);
+      return false;
+    }
+  }
+  
+  // Modal Handlers
+  function openModalForAdd() {
+    currentEditId = null;
+    modalTitleElem.innerText = "📖 Tambah Buku Baru";
+    bookTitleInput.value = "";
+    bookAuthorInput.value = "";
+    bookYearInput.value = "";
+    modalOverlay.classList.add("active");
+  }
+  
+  function openModalForEdit(book) {
+    currentEditId = book.id;
+    modalTitleElem.innerText = "✏️ Edit Buku";
+    bookTitleInput.value = book.title;
+    bookAuthorInput.value = book.author;
+    bookYearInput.value = book.year;
+    modalOverlay.classList.add("active");
+  }
+  
+  function closeModal() {
+    modalOverlay.classList.remove("active");
+    currentEditId = null;
+  }
+  
+  async function handleSave() {
+    const title = bookTitleInput.value;
+    const author = bookAuthorInput.value;
+    const year = bookYearInput.value;
+    
+    if (currentEditId === null) {
+      const success = await addBookToFirebase(title, author, year);
+      if (success) {
+        closeModal();
+        // reset search agar buku baru terlihat
+        searchTerm = "";
+        searchInput.value = "";
+        // data akan otomatis muncul via onSnapshot
+      }
+    } else {
+      const success = await updateBookInFirebase(currentEditId, title, author, year);
+      if (success) closeModal();
+    }
+  }
+  
+  // Event Delegation untuk Edit & Delete
+  function bindGridEvents() {
+    booksGrid.addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('.edit-btn');
+      if (editBtn && editBtn.dataset.id) {
+        const bookId = editBtn.dataset.id;
+        const book = booksList.find(b => b.id === bookId);
+        if (book) openModalForEdit(book);
+        return;
+      }
+      const delBtn = e.target.closest('.delete-btn');
+      if (delBtn && delBtn.dataset.id) {
+        const bookId = delBtn.dataset.id;
+        await deleteBookFromFirebase(bookId);
+        // data terhapus, snapshot akan update otomatis
+      }
+    });
+  }
+  
+  // Search handler
+  function handleSearch() {
+    searchTerm = searchInput.value;
+    renderBooks();  // filter berdasarkan booksList yang sudah ada
+  }
+  
+  function resetSearch() {
+    searchTerm = "";
+    searchInput.value = "";
+    renderBooks();
+  }
+  
+  // Inisialisasi event & Firebase subscribe
+  function init() {
+    subscribeToBooks();       // mulai listen realtime
+    bindGridEvents();
+    searchInput.addEventListener('input', handleSearch);
+    resetSearchBtn.addEventListener('click', resetSearch);
+    openAddModalBtn.addEventListener('click', openModalForAdd);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+    saveBookBtn.addEventListener('click', handleSave);
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
+    });
+  }
+  
+  // Jalankan init
+  init();
+</script>
+</body>
+</html>
