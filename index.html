@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>📚 PustakaKita| </title>
+  <title>📚 PustakaKita | Perpustakaan Digital + Firebase</title>
   <!-- Google Fonts + Font Awesome 6 -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -385,7 +385,7 @@
 
 <!-- Modal Form -->
 <div id="modalOverlay" class="modal-overlay">
-  <div class="modal-ner">
+  <div class="modal-container">
     <div class="modal-header">
       <h3 id="modalTitle">Tambah Buku</h3>
       <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
@@ -418,16 +418,14 @@
   // 2. Tambahkan aplikasi web, copy objek firebaseConfig di bawah.
   // 3. Aktifkan Firestore Database (mode test untuk development).
   // ====================================================================
-      // Konfigurasi Firebase
-    const firebaseConfig = {
-  apiKey: "AIzaSyCfqZD7UZZt-GWmtNhfJyksrv3-8ENRjto",
-  authDomain: "insan-cemerlang-d5574.firebaseapp.com",
-  projectId: "insan-cemerlang-d5574",
-  storageBucket: "insan-cemerlang-d5574.appspot.com",
-  messagingSenderId: "1035937160050",
-  appId: "1:1035937160050:web:6d77d3874c3f78b2811beb",
-  measurementId: "G-EVVQ80Q08C"
-};
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",            // Ganti dengan apiKey Anda
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
   // ====================================================================
   
   // Inisialisasi Firebase
