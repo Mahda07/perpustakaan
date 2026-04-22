@@ -21,6 +21,7 @@ const usersCol = collection(db, "users");
 
 let currentUser = null, currentRole = null, currentUserData = null;
 let books = [], loans = [], members = [];
+let adminBookSearchTerm = ""; // untuk menyimpan kata kunci pencarian buku oleh admin
 
 // DOM elements
 const authContainer = document.getElementById("authContainer");
@@ -150,20 +151,86 @@ function renderAdminDashboard() {
   document.querySelector(".menu-card").click();
 }
 
+// ========== KELOLA BUKU DENGAN FITUR PENCARIAN ==========
 async function renderManageBooks() {
-  contentPanel.innerHTML = `<div><button class="btn-primary" id="addBookBtn">+ Tambah Buku</button><div id="booksListAdmin"></div></div>`;
+  // Buat elemen pencarian dan container tabel
+  contentPanel.innerHTML = `
+    <div style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center;">
+      <button class="btn-primary" id="addBookBtn">+ Tambah Buku</button>
+      <div style="flex:1;">
+        <input type="text" id="searchBookAdmin" placeholder="🔍 Cari buku (judul / penulis)..." style="width:100%; padding:0.5rem; border-radius:2rem; border:1px solid #ccc;">
+      </div>
+      <button id="resetSearchBookBtn" class="btn-primary" style="background:#6c757d;">Reset</button>
+    </div>
+    <div id="booksListAdmin"></div>
+  `;
+  
   const booksDiv = document.getElementById("booksListAdmin");
-  onSnapshot(query(booksCol, orderBy("title")), (snap) => {
-    books = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    booksDiv.innerHTML = `<table><thead><tr><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Stok</th><th>Aksi</th></tr></thead>
-      <tbody>${books.map(book => `<tr>
-        <td>${escapeHtml(book.title)}</td><td>${escapeHtml(book.author)}</td><td>${book.year}</td>
-        <td>${book.stock || 0}</td>
-        <td><button class="editBookBtn" data-id="${book.id}">Edit</button> <button class="deleteBookBtn" data-id="${book.id}">Hapus</button></td>
-      </tr>`).join('')}</tbody></table>`;
+  const searchInput = document.getElementById("searchBookAdmin");
+  const resetBtn = document.getElementById("resetSearchBookBtn");
+  
+  // Fungsi untuk render tabel dengan filter
+  const renderBooksTable = () => {
+    let filteredBooks = books;
+    if (adminBookSearchTerm.trim() !== "") {
+      const term = adminBookSearchTerm.toLowerCase();
+      filteredBooks = books.filter(book => 
+        book.title.toLowerCase().includes(term) || 
+        book.author.toLowerCase().includes(term)
+      );
+    }
+    
+    if (filteredBooks.length === 0) {
+      booksDiv.innerHTML = `<p style="text-align:center; padding:2rem;">📭 Tidak ada buku yang ditemukan.</p>`;
+      return;
+    }
+    
+    booksDiv.innerHTML = `
+      <table style="margin-top:1rem; width:100%">
+        <thead>
+          <tr><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Stok</th><th>Aksi</th></tr>
+        </thead>
+        <tbody>
+          ${filteredBooks.map(book => `
+            <tr>
+              <td>${escapeHtml(book.title)}</td>
+              <td>${escapeHtml(book.author)}</td>
+              <td>${book.year}</td>
+              <td>${book.stock || 0}</td>
+              <td>
+                <button class="editBookBtn" data-id="${book.id}" style="background:#ffedd5; border:none; padding:4px 10px; border-radius:1rem;">Edit</button>
+                <button class="deleteBookBtn" data-id="${book.id}" style="background:#fee2e2; border:none; padding:4px 10px; border-radius:1rem;">Hapus</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    
+    // Re-attach event listeners untuk tombol edit/hapus
     document.querySelectorAll(".editBookBtn").forEach(btn => btn.addEventListener("click", () => openBookModal(btn.dataset.id)));
     document.querySelectorAll(".deleteBookBtn").forEach(btn => btn.addEventListener("click", async () => { if (confirm("Hapus buku?")) await deleteDoc(doc(db, "books", btn.dataset.id)); }));
+  };
+  
+  // Listener perubahan data buku (realtime)
+  const unsubscribeBooks = onSnapshot(query(booksCol, orderBy("title")), (snap) => {
+    books = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderBooksTable();
   });
+  
+  // Event listener pencarian
+  const handleSearch = () => {
+    adminBookSearchTerm = searchInput.value;
+    renderBooksTable();
+  };
+  searchInput.addEventListener("input", handleSearch);
+  resetBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    adminBookSearchTerm = "";
+    renderBooksTable();
+  });
+  
+  // Tombol tambah buku
   document.getElementById("addBookBtn").onclick = () => openBookModal(null);
 }
 
@@ -183,8 +250,11 @@ function openBookModal(bookId) {
     const year = parseInt(document.getElementById("bookYear").value);
     const stock = parseInt(document.getElementById("bookStock").value);
     if (!title || !author || !year || isNaN(stock)) return alert("Isi semua data");
-    if (bookId) await updateDoc(doc(db, "books", bookId), { title, author, year, stock });
-    else await addDoc(booksCol, { title, author, year, stock, isAvailable: stock > 0 });
+    if (bookId) {
+      await updateDoc(doc(db, "books", bookId), { title, author, year, stock, isAvailable: stock > 0 });
+    } else {
+      await addDoc(booksCol, { title, author, year, stock, isAvailable: stock > 0 });
+    }
     genericModal.style.display = "none";
   };
   modalCloseBtn.onclick = () => genericModal.style.display = "none";
@@ -254,7 +324,7 @@ async function renderManageMembers() {
   const q = query(usersCol, where("role", "==", "anggota"));
   onSnapshot(q, (snap) => {
     members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    membersDiv.innerHTML = `<table><thead><tr><th>Username</th><th>Nama</th><th>Kelas</th><th>Email</th><th>Aksi</th></tr></thead>
+    membersDiv.innerHTML = `</table><thead>烷<th>Username</th><th>Nama</th><th>Kelas</th><th>Email</th><th>Aksi</th></tr></thead>
       <tbody>${members.map(m => `<tr>
         <td>${escapeHtml(m.username)}</td><td>${escapeHtml(m.fullname)}</td><td>${escapeHtml(m.kelas || '-')}</td><td>${escapeHtml(m.email)}</td>
         <td><button class="editMemberBtn" data-id="${m.id}">Edit</button> <button class="deleteMemberBtn" data-id="${m.id}">Hapus</button></td>
@@ -447,7 +517,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// Event listeners
+// Event listeners untuk login/register
 const modeTabs = document.querySelectorAll(".mode-tab");
 modeTabs.forEach(tab => {
   tab.addEventListener("click", () => {
