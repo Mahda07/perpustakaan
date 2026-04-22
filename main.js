@@ -1,32 +1,10 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, query, where, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCfqZD7UZZt-GWmtNhfJyksrv3-8ENRjto",
-  authDomain: "insan-cemerlang-d5574.firebaseapp.com",
-  projectId: "insan-cemerlang-d5574",
-  storageBucket: "insan-cemerlang-d5574.appspot.com",
-  messagingSenderId: "1035937160050",
-  appId: "1:1035937160050:web:6d77d3874c3f78b2811beb",
-  measurementId: "G-EVVQ80Q08C"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const booksCol = collection(db, "books");
-const loansCol = collection(db, "borrowings");
-const usersCol = collection(db, "users");
-
+// main.js - Aplikasi Perpustakaan Offline dengan SQLite (sql.js)
+let db = null;
 let currentUser = null;
-let currentRole = null;
 let currentUserData = null;
-let books = [];
-let loans = [];
-let members = [];
+let currentRole = null;
 
-// DOM Auth
+// DOM elements
 const authContainer = document.getElementById("authContainer");
 const dashboardContainer = document.getElementById("dashboardContainer");
 const loginForm = document.getElementById("loginForm");
@@ -57,36 +35,114 @@ const modalCloseBtn = document.getElementById("modalCloseBtn");
 let currentMenu = "";
 let selectedLoginRole = "admin";
 
-function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
-
-// Registrasi user baru
-async function registerUser(username, fullname, email, password, role) {
-  const usernameQuery = query(usersCol, where("username", "==", username));
-  const existing = await getDocs(usernameQuery);
-  if (!existing.empty) throw new Error("Username sudah digunakan");
-  const emailQuery = query(usersCol, where("email", "==", email));
-  const existingEmail = await getDocs(emailQuery);
-  if (!existingEmail.empty) throw new Error("Email sudah terdaftar");
-  if (role === "admin") {
-    const adminQuery = query(usersCol, where("role", "==", "admin"));
-    const adminSnap = await getDocs(adminQuery);
-    if (!adminSnap.empty) throw new Error("Admin sudah ada, tidak bisa mendaftar admin lagi");
+// Helper: simple hash (bukan untuk produksi, hanya offline)
+function hashPassword(pwd) {
+  let hash = 0;
+  for (let i = 0; i < pwd.length; i++) {
+    hash = ((hash << 5) - hash) + pwd.charCodeAt(i);
+    hash |= 0;
   }
-  const userCred = await createUserWithEmailAndPassword(auth, email, password);
-  await setDoc(doc(db, "users", userCred.user.uid), {
-    username, fullname, email, role, createdAt: new Date()
+  return hash.toString();
+}
+
+// Inisialisasi database dari localStorage atau baru
+async function initDB() {
+  return new Promise((resolve, reject) => {
+    const saved = localStorage.getItem("pustaka_db");
+    const config = {
+      locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${filename}`
+    };
+    initSqlJs(config).then(SQL => {
+      if (saved) {
+        const buffer = Uint8Array.from(atob(saved), c => c.charCodeAt(0));
+        db = new SQL.Database(buffer);
+      } else {
+        db = new SQL.Database();
+      }
+      // Buat tabel jika belum ada
+      db.run(`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        fullname TEXT,
+        email TEXT UNIQUE,
+        password TEXT,
+        role TEXT
+      )`);
+      db.run(`CREATE TABLE IF NOT EXISTS books (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        author TEXT,
+        year INTEGER,
+        isAvailable INTEGER DEFAULT 1,
+        borrowerName TEXT DEFAULT ''
+      )`);
+      db.run(`CREATE TABLE IF NOT EXISTS borrowings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bookId INTEGER,
+        bookTitle TEXT,
+        borrowerName TEXT,
+        borrowerEmail TEXT,
+        borrowDate TEXT,
+        dueDate TEXT,
+        returnDate TEXT,
+        fine INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'borrowed'
+      )`);
+      
+      // Cek apakah ada admin, jika tidak buat default (admin/admin123)
+      const adminCheck = db.exec("SELECT * FROM users WHERE role = 'admin'");
+      if (adminCheck.length === 0 || adminCheck[0].values.length === 0) {
+        const hashed = hashPassword("admin123");
+        db.run(`INSERT INTO users (username, fullname, email, password, role) VALUES (?, ?, ?, ?, ?)`,
+          ["admin", "Administrator", "admin@library.com", hashed, "admin"]);
+      }
+      resolve();
+    }).catch(reject);
   });
-  return userCred.user;
+}
+
+// Simpan database ke localStorage
+function saveDB() {
+  const data = db.export();
+  const str = btoa(String.fromCharCode(...data));
+  localStorage.setItem("pustaka_db", str);
+}
+
+// Helper query
+function query(sql, params = []) {
+  const stmt = db.prepare(sql);
+  stmt.bind(params);
+  const result = [];
+  while (stmt.step()) result.push(stmt.getAsObject());
+  stmt.free();
+  return result;
+}
+
+function run(sql, params = []) {
+  db.run(sql, params);
+  saveDB();
+}
+
+// ======================= AUTH =======================
+async function registerUser(username, fullname, email, password, role) {
+  const existing = query("SELECT * FROM users WHERE username = ? OR email = ?", [username, email]);
+  if (existing.length > 0) throw new Error("Username atau email sudah digunakan");
+  if (role === "admin") {
+    const adminExist = query("SELECT * FROM users WHERE role = 'admin'");
+    if (adminExist.length > 0) throw new Error("Admin sudah ada, tidak bisa mendaftar admin lagi");
+  }
+  const hashed = hashPassword(password);
+  run(`INSERT INTO users (username, fullname, email, password, role) VALUES (?, ?, ?, ?, ?)`,
+    [username, fullname, email, hashed, role]);
+  return true;
 }
 
 async function loginWithUsername(username, password, role) {
-  const q = query(usersCol, where("username", "==", username), where("role", "==", role));
-  const snap = await getDocs(q);
-  if (snap.empty) throw new Error("Username atau role tidak ditemukan");
-  const userDoc = snap.docs[0];
-  const email = userDoc.data().email;
-  await signInWithEmailAndPassword(auth, email, password);
-  return userDoc.data();
+  const users = query("SELECT * FROM users WHERE username = ? AND role = ?", [username, role]);
+  if (users.length === 0) throw new Error("Username atau role tidak ditemukan");
+  const user = users[0];
+  if (user.password !== hashPassword(password)) throw new Error("Password salah");
+  return user;
 }
 
 // ======================= DASHBOARD ADMIN =======================
@@ -107,14 +163,24 @@ function renderAdminDashboard() {
       else if (currentMenu === "manageMembers") renderManageMembers();
     });
   });
+  // Tambahkan tombol ekspor di panel atas
+  const exportBtn = document.createElement('button');
+  exportBtn.className = "btn-primary";
+  exportBtn.innerHTML = '<i class="fas fa-download"></i> Ekspor Database (.sql)';
+  exportBtn.style.marginBottom = "1rem";
+  exportBtn.onclick = exportSQL;
+  contentPanel.innerHTML = '';
+  contentPanel.appendChild(exportBtn);
   document.querySelector(".menu-card").click();
 }
 
-async function renderManageBooks() {
-  contentPanel.innerHTML = `<div><button class="btn-primary" id="addBookBtn">+ Tambah Buku</button><div id="booksListAdmin"></div></div>`;
+function renderManageBooks() {
+  const div = document.createElement('div');
+  div.innerHTML = `<button class="btn-primary" id="addBookBtn">+ Tambah Buku</button><div id="booksListAdmin"></div>`;
+  contentPanel.appendChild(div);
   const booksDiv = document.getElementById("booksListAdmin");
-  const unsubscribe = onSnapshot(query(booksCol, orderBy("title")), (snap) => {
-    books = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  function refreshBooks() {
+    const books = query("SELECT * FROM books ORDER BY title");
     booksDiv.innerHTML = `
       <table style="margin-top:1rem; width:100%">
         <thead><tr><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Status</th><th>Aksi</th></tr></thead>
@@ -129,14 +195,19 @@ async function renderManageBooks() {
         `).join('')}</tbody>
       </table>
     `;
-    document.querySelectorAll(".editBookBtn").forEach(btn => btn.addEventListener("click", () => openBookModal(btn.dataset.id)));
-    document.querySelectorAll(".deleteBookBtn").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Hapus buku?")) await deleteDoc(doc(db, "books", btn.dataset.id)); }));
-  });
+    document.querySelectorAll(".editBookBtn").forEach(btn => btn.addEventListener("click", () => openBookModal(parseInt(btn.dataset.id))));
+    document.querySelectorAll(".deleteBookBtn").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Hapus buku?")) { run("DELETE FROM books WHERE id = ?", [parseInt(btn.dataset.id)]); refreshBooks(); } }));
+  }
+  refreshBooks();
   document.getElementById("addBookBtn").onclick = () => openBookModal(null);
 }
 
 function openBookModal(bookId) {
-  const book = bookId ? books.find(b => b.id === bookId) : null;
+  let book = null;
+  if (bookId) {
+    const res = query("SELECT * FROM books WHERE id = ?", [bookId]);
+    if (res.length) book = res[0];
+  }
   modalTitle.innerText = book ? "Edit Buku" : "Tambah Buku";
   modalBody.innerHTML = `
     <input id="bookTitle" placeholder="Judul" value="${book ? escapeHtml(book.title) : ''}">
@@ -150,31 +221,33 @@ function openBookModal(bookId) {
     const year = parseInt(document.getElementById("bookYear").value);
     if (!title || !author || !year) return alert("Isi semua data");
     if (bookId) {
-      await updateDoc(doc(db, "books", bookId), { title, author, year });
+      run("UPDATE books SET title = ?, author = ?, year = ? WHERE id = ?", [title, author, year, bookId]);
     } else {
-      await addDoc(booksCol, { title, author, year, isAvailable: true, borrowerName: "" });
+      run("INSERT INTO books (title, author, year, isAvailable) VALUES (?, ?, ?, 1)", [title, author, year]);
     }
     genericModal.style.display = "none";
+    renderManageBooks();
   };
   modalSaveBtn.onclick = saveHandler;
   modalCloseBtn.onclick = () => genericModal.style.display = "none";
 }
 
-async function renderManageTransactions() {
-  contentPanel.innerHTML = `<div><button class="btn-primary" id="addTransactionBtn">+ Pinjam Buku (Manual)</button><input type="text" id="searchTrans" placeholder="Cari peminjam/buku" style="margin-left:1rem; padding:0.3rem; border-radius:2rem; border:1px solid #ccc;"><div id="transactionsList"></div></div>`;
+function renderManageTransactions() {
+  const div = document.createElement('div');
+  div.innerHTML = `<button class="btn-primary" id="addTransactionBtn">+ Pinjam Buku (Manual)</button><input type="text" id="searchTrans" placeholder="Cari peminjam/buku" style="margin-left:1rem; padding:0.3rem; border-radius:2rem; border:1px solid #ccc;"><div id="transactionsList"></div>`;
+  contentPanel.appendChild(div);
   const transDiv = document.getElementById("transactionsList");
   const searchInput = document.getElementById("searchTrans");
-  const unsubscribe = onSnapshot(query(loansCol, orderBy("borrowDate", "desc")), async (snap) => {
-    loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    let filtered = loans;
-    if (searchInput && searchInput.value) {
-      const term = searchInput.value.toLowerCase();
-      filtered = loans.filter(l => l.borrowerName.toLowerCase().includes(term) || (l.bookTitle || "").toLowerCase().includes(term));
+  function refreshTransactions() {
+    let loans = query("SELECT * FROM borrowings ORDER BY borrowDate DESC");
+    let term = searchInput ? searchInput.value.toLowerCase() : "";
+    if (term) {
+      loans = loans.filter(l => l.borrowerName.toLowerCase().includes(term) || (l.bookTitle || "").toLowerCase().includes(term));
     }
     transDiv.innerHTML = `
       <table style="margin-top:1rem">
         <thead><tr><th>Buku</th><th>Peminjam</th><th>Tgl Pinjam</th><th>Jatuh Tempo</th><th>Status</th><th>Denda</th><th>Aksi</th></tr></thead>
-        <tbody>${filtered.map(loan => {
+        <tbody>${loans.map(loan => {
           const isReturned = !!loan.returnDate;
           let fineDisplay = "-";
           if (!isReturned) {
@@ -193,40 +266,39 @@ async function renderManageTransactions() {
               <td>
                 ${!isReturned ? `<button class="returnTransBtn" data-id="${loan.id}" data-bookid="${loan.bookId}" style="background:#ffedd5; border:none; padding:4px 10px; border-radius:1rem;">Kembalikan</button>` : ''}
                 <button class="deleteTransBtn" data-id="${loan.id}" style="background:#fee2e2; border:none; padding:4px 10px; border-radius:1rem;">Hapus</button>
-               </td>
+              </td>
             </tr>
           `;
         }).join('')}</tbody>
       </table>
     `;
-    document.querySelectorAll(".returnTransBtn").forEach(btn => btn.addEventListener("click", async () => { await returnBook(btn.dataset.id, btn.dataset.bookid); }));
-    document.querySelectorAll(".deleteTransBtn").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Hapus transaksi?")) await deleteDoc(doc(db, "borrowings", btn.dataset.id)); }));
-  });
-  if (searchInput) searchInput.addEventListener("input", () => {});
+    document.querySelectorAll(".returnTransBtn").forEach(btn => btn.addEventListener("click", async () => { await returnBook(parseInt(btn.dataset.id), parseInt(btn.dataset.bookid)); refreshTransactions(); }));
+    document.querySelectorAll(".deleteTransBtn").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Hapus transaksi?")) { run("DELETE FROM borrowings WHERE id = ?", [parseInt(btn.dataset.id)]); refreshTransactions(); } }));
+  }
+  refreshTransactions();
+  if (searchInput) searchInput.addEventListener("input", refreshTransactions);
   document.getElementById("addTransactionBtn").onclick = () => openManualBorrowModal();
 }
 
 async function returnBook(loanId, bookId) {
-  const loanRef = doc(db, "borrowings", loanId);
-  const loanSnap = await getDoc(loanRef);
-  if (!loanSnap.exists()) return;
-  const loan = loanSnap.data();
+  const loan = query("SELECT * FROM borrowings WHERE id = ?", [loanId])[0];
+  if (!loan) return;
   if (loan.returnDate) return alert("Sudah dikembalikan");
   const due = new Date(loan.dueDate);
   const today = new Date();
   let fine = today > due ? 10000 : 0;
   if (confirm(fine ? `Terlambat! Denda Rp10.000. Lanjutkan?` : "Kembalikan buku?")) {
-    await updateDoc(loanRef, { returnDate: new Date().toISOString().split('T')[0], fine });
-    await updateDoc(doc(db, "books", bookId), { isAvailable: true, borrowerName: "" });
+    run("UPDATE borrowings SET returnDate = ?, fine = ? WHERE id = ?", [new Date().toISOString().split('T')[0], fine, loanId]);
+    run("UPDATE books SET isAvailable = 1, borrowerName = '' WHERE id = ?", [bookId]);
     alert("Buku dikembalikan");
   }
 }
 
 function openManualBorrowModal() {
+  const books = query("SELECT * FROM books WHERE isAvailable = 1");
   modalTitle.innerText = "Pinjam Buku (Manual)";
-  const availableBooks = books.filter(b => b.isAvailable);
   modalBody.innerHTML = `
-    <select id="bookSelect"><option value="">Pilih Buku</option>${availableBooks.map(b => `<option value="${b.id}">${escapeHtml(b.title)}</option>`).join('')}</select>
+    <select id="bookSelect"><option value="">Pilih Buku</option>${books.map(b => `<option value="${b.id}">${escapeHtml(b.title)}</option>`).join('')}</select>
     <input id="borrowerName" placeholder="Nama Peminjam">
     <input type="text" id="borrowDate" placeholder="Tanggal Pinjam">
     <input type="text" id="dueDate" placeholder="Jatuh Tempo">
@@ -235,30 +307,30 @@ function openManualBorrowModal() {
   flatpickr("#dueDate", { dateFormat: "Y-m-d", defaultDate: new Date(Date.now() + 7*86400000) });
   genericModal.style.display = "flex";
   modalSaveBtn.onclick = async () => {
-    const bookId = document.getElementById("bookSelect").value;
+    const bookId = parseInt(document.getElementById("bookSelect").value);
     const borrower = document.getElementById("borrowerName").value.trim();
     const borrowDate = document.getElementById("borrowDate").value;
     const dueDate = document.getElementById("dueDate").value;
     if (!bookId || !borrower || !borrowDate || !dueDate) return alert("Lengkapi data");
-    const book = books.find(b => b.id === bookId);
+    const book = query("SELECT * FROM books WHERE id = ?", [bookId])[0];
     if (!book || !book.isAvailable) return alert("Buku tidak tersedia");
-    await addDoc(loansCol, {
-      bookId, bookTitle: book.title, borrowerName: borrower, borrowerEmail: "",
-      borrowDate, dueDate, returnDate: null, fine: 0, status: "borrowed"
-    });
-    await updateDoc(doc(db, "books", bookId), { isAvailable: false, borrowerName: borrower });
+    run(`INSERT INTO borrowings (bookId, bookTitle, borrowerName, borrowerEmail, borrowDate, dueDate, returnDate, fine, status) VALUES (?, ?, ?, ?, ?, ?, NULL, 0, 'borrowed')`,
+      [bookId, book.title, borrower, "", borrowDate, dueDate]);
+    run("UPDATE books SET isAvailable = 0, borrowerName = ? WHERE id = ?", [borrower, bookId]);
     alert("Peminjaman berhasil");
     genericModal.style.display = "none";
+    renderManageTransactions();
   };
   modalCloseBtn.onclick = () => genericModal.style.display = "none";
 }
 
-async function renderManageMembers() {
-  contentPanel.innerHTML = `<div><button class="btn-primary" id="addMemberBtn">+ Tambah Anggota</button><div id="membersList"></div></div>`;
+function renderManageMembers() {
+  const div = document.createElement('div');
+  div.innerHTML = `<button class="btn-primary" id="addMemberBtn">+ Tambah Anggota</button><div id="membersList"></div>`;
+  contentPanel.appendChild(div);
   const membersDiv = document.getElementById("membersList");
-  const q = query(usersCol, where("role", "==", "anggota"));
-  const unsubscribe = onSnapshot(q, (snap) => {
-    members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  function refreshMembers() {
+    const members = query("SELECT * FROM users WHERE role = 'anggota'");
     membersDiv.innerHTML = `
       <table style="margin-top:1rem">
         <thead><tr><th>Username</th><th>Nama Lengkap</th><th>Email</th><th>Aksi</th></tr></thead>
@@ -267,24 +339,29 @@ async function renderManageMembers() {
             <td>${escapeHtml(m.username)}</td>
             <td>${escapeHtml(m.fullname || '')}</td>
             <td>${escapeHtml(m.email)}</td>
-            <td><button class="editMemberBtn" data-id="${m.id}" style="background:#ffedd5; border:none; padding:4px 10px; border-radius:1rem;">Edit</button> <button class="deleteMemberBtn" data-id="${m.id}" data-email="${m.email}" style="background:#fee2e2; border:none; padding:4px 10px; border-radius:1rem;">Hapus</button></td>
+            <td><button class="editMemberBtn" data-id="${m.id}" style="background:#ffedd5; border:none; padding:4px 10px; border-radius:1rem;">Edit</button> <button class="deleteMemberBtn" data-id="${m.id}" style="background:#fee2e2; border:none; padding:4px 10px; border-radius:1rem;">Hapus</button></td>
           </tr>
         `).join('')}</tbody>
       </table>
     `;
-    document.querySelectorAll(".editMemberBtn").forEach(btn => btn.addEventListener("click", () => openMemberModal(btn.dataset.id)));
+    document.querySelectorAll(".editMemberBtn").forEach(btn => btn.addEventListener("click", () => openMemberModal(parseInt(btn.dataset.id))));
     document.querySelectorAll(".deleteMemberBtn").forEach(btn => btn.addEventListener("click", async () => {
       if(confirm("Hapus anggota?")) {
-        await deleteDoc(doc(db, "users", btn.dataset.id));
-        alert("Anggota dihapus dari database.");
+        run("DELETE FROM users WHERE id = ?", [parseInt(btn.dataset.id)]);
+        refreshMembers();
       }
     }));
-  });
+  }
+  refreshMembers();
   document.getElementById("addMemberBtn").onclick = () => openMemberModal(null);
 }
 
-async function openMemberModal(memberId) {
-  const member = memberId ? members.find(m => m.id === memberId) : null;
+function openMemberModal(memberId) {
+  let member = null;
+  if (memberId) {
+    const res = query("SELECT * FROM users WHERE id = ?", [memberId]);
+    if (res.length) member = res[0];
+  }
   modalTitle.innerText = member ? "Edit Anggota" : "Tambah Anggota";
   modalBody.innerHTML = `
     <input id="memberUsername" placeholder="Username" value="${member ? escapeHtml(member.username) : ''}" ${member ? 'readonly' : ''}>
@@ -300,16 +377,19 @@ async function openMemberModal(memberId) {
     const password = document.getElementById("memberPassword").value;
     if (!username || !fullname || !email) return alert("Isi semua data");
     if (memberId) {
-      await updateDoc(doc(db, "users", memberId), { fullname, email });
-      if (password) alert("Ubah password tidak dapat dari sini.");
+      run("UPDATE users SET fullname = ?, email = ? WHERE id = ?", [fullname, email, memberId]);
+      if (password) {
+        const hashed = hashPassword(password);
+        run("UPDATE users SET password = ? WHERE id = ?", [hashed, memberId]);
+      }
     } else {
+      const hashed = hashPassword(password);
       try {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        await setDoc(doc(db, "users", userCred.user.uid), { username, fullname, email, role: "anggota" });
-        alert("Anggota berhasil ditambahkan");
-      } catch(err) { alert("Gagal: " + err.message); }
+        run(`INSERT INTO users (username, fullname, email, password, role) VALUES (?, ?, ?, ?, 'anggota')`, [username, fullname, email, hashed]);
+      } catch(e) { alert("Gagal: " + e.message); }
     }
     genericModal.style.display = "none";
+    renderManageMembers();
   };
   modalCloseBtn.onclick = () => genericModal.style.display = "none";
 }
@@ -332,24 +412,27 @@ function renderAnggotaDashboard() {
   document.querySelector(".menu-card").click();
 }
 
-async function renderAnggotaPinjam() {
-  contentPanel.innerHTML = `<h3>📖 Daftar Buku Tersedia</h3><input type="text" id="searchAnggotaPinjam" placeholder="Cari buku" style="margin-bottom:1rem; padding:0.5rem; border-radius:2rem; border:1px solid #ccc; width:100%;"><div id="availableBooksAnggota"></div>`;
+function renderAnggotaPinjam() {
+  const div = document.createElement('div');
+  div.innerHTML = `<h3>📖 Daftar Buku Tersedia</h3><input type="text" id="searchAnggotaPinjam" placeholder="Cari buku" style="margin-bottom:1rem; padding:0.5rem; border-radius:2rem; border:1px solid #ccc; width:100%;"><div id="availableBooksAnggota"></div>`;
+  contentPanel.innerHTML = '';
+  contentPanel.appendChild(div);
   const booksDiv = document.getElementById("availableBooksAnggota");
   const search = document.getElementById("searchAnggotaPinjam");
-  const unsubscribe = onSnapshot(query(booksCol, orderBy("title")), (snap) => {
-    let allBooks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    let available = allBooks.filter(b => b.isAvailable);
+  function refreshBooks() {
+    let books = query("SELECT * FROM books WHERE isAvailable = 1 ORDER BY title");
     const term = search ? search.value.toLowerCase() : "";
-    if (term) available = available.filter(b => b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term));
-    booksDiv.innerHTML = `<div class="books-grid">${available.map(book => `
+    if (term) books = books.filter(b => b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term));
+    booksDiv.innerHTML = `<div class="books-grid">${books.map(book => `
       <div class="book-card">
         <strong>${escapeHtml(book.title)}</strong><br>${escapeHtml(book.author)} (${book.year})<br>
         <button class="pinjamBtn" data-id="${book.id}" data-title="${escapeHtml(book.title)}" style="margin-top:8px; background:#ff8c00; border:none; padding:6px 12px; border-radius:2rem; color:white;">Pinjam</button>
       </div>
     `).join('')}</div>`;
-    document.querySelectorAll(".pinjamBtn").forEach(btn => btn.addEventListener("click", () => openAnggotaBorrowModal(btn.dataset.id, btn.dataset.title)));
-  });
-  if (search) search.addEventListener("input", () => {});
+    document.querySelectorAll(".pinjamBtn").forEach(btn => btn.addEventListener("click", () => openAnggotaBorrowModal(parseInt(btn.dataset.id), btn.dataset.title)));
+  }
+  refreshBooks();
+  if (search) search.addEventListener("input", refreshBooks);
 }
 
 function openAnggotaBorrowModal(bookId, bookTitle) {
@@ -366,13 +449,11 @@ function openAnggotaBorrowModal(bookId, bookTitle) {
     const borrowDate = document.getElementById("borrowDateAnggota").value;
     const dueDate = document.getElementById("dueDateAnggota").value;
     if (!borrowDate || !dueDate) return alert("Tanggal harus diisi");
-    const book = books.find(b => b.id === bookId);
+    const book = query("SELECT * FROM books WHERE id = ?", [bookId])[0];
     if (!book || !book.isAvailable) return alert("Buku tidak tersedia");
-    await addDoc(loansCol, {
-      bookId, bookTitle: book.title, borrowerName: currentUserData.username, borrowerEmail: currentUser.email,
-      borrowDate, dueDate, returnDate: null, fine: 0, status: "borrowed"
-    });
-    await updateDoc(doc(db, "books", bookId), { isAvailable: false, borrowerName: currentUserData.username });
+    run(`INSERT INTO borrowings (bookId, bookTitle, borrowerName, borrowerEmail, borrowDate, dueDate, returnDate, fine, status) VALUES (?, ?, ?, ?, ?, ?, NULL, 0, 'borrowed')`,
+      [bookId, book.title, currentUserData.username, currentUserData.email, borrowDate, dueDate]);
+    run("UPDATE books SET isAvailable = 0, borrowerName = ? WHERE id = ?", [currentUserData.username, bookId]);
     alert("Buku berhasil dipinjam");
     genericModal.style.display = "none";
     renderAnggotaPinjam();
@@ -380,16 +461,18 @@ function openAnggotaBorrowModal(bookId, bookTitle) {
   modalCloseBtn.onclick = () => genericModal.style.display = "none";
 }
 
-async function renderAnggotaKembali() {
-  contentPanel.innerHTML = `<h3>📘 Buku yang Sedang Dipinjam</h3><div id="loansAnggota"></div>`;
+function renderAnggotaKembali() {
+  const div = document.createElement('div');
+  div.innerHTML = `<h3>📘 Buku yang Sedang Dipinjam</h3><div id="loansAnggota"></div>`;
+  contentPanel.innerHTML = '';
+  contentPanel.appendChild(div);
   const loansDiv = document.getElementById("loansAnggota");
-  const q = query(loansCol, where("borrowerEmail", "==", currentUser.email), orderBy("borrowDate", "desc"));
-  const unsubscribe = onSnapshot(q, (snap) => {
-    const myLoans = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(l => !l.returnDate);
+  function refreshLoans() {
+    const loans = query("SELECT * FROM borrowings WHERE borrowerEmail = ? AND returnDate IS NULL ORDER BY borrowDate DESC", [currentUserData.email]);
     loansDiv.innerHTML = `
       <table>
         <thead><tr><th>Buku</th><th>Tgl Pinjam</th><th>Jatuh Tempo</th><th>Denda</th><th>Aksi</th></tr></thead>
-        <tbody>${myLoans.map(loan => {
+        <tbody>${loans.map(loan => {
           const due = new Date(loan.dueDate);
           const today = new Date();
           let fine = today > due ? "<span class='fine-badge'>Rp10.000</span>" : "-";
@@ -404,42 +487,79 @@ async function renderAnggotaKembali() {
       </table>
     `;
     document.querySelectorAll(".returnAnggotaBtn").forEach(btn => btn.addEventListener("click", async () => {
-      await returnBook(btn.dataset.id, btn.dataset.bookid);
-      renderAnggotaKembali();
+      await returnBook(parseInt(btn.dataset.id), parseInt(btn.dataset.bookid));
+      refreshLoans();
       renderAnggotaPinjam();
     }));
-  });
+  }
+  refreshLoans();
 }
 
-// ======================= AUTH STATE =======================
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-      currentUserData = userDoc.data();
-      currentRole = currentUserData.role;
-      userNameDisplay.innerText = currentUserData.username;
-      userRoleDisplay.innerText = currentRole === "admin" ? "Administrator" : "Anggota";
-      currentUser = user;
-      authContainer.style.display = "none";
-      dashboardContainer.style.display = "block";
-      if (currentRole === "admin") renderAdminDashboard();
-      else renderAnggotaDashboard();
-    } else {
-      await signOut(auth);
-      alert("Akun tidak valid, silakan registrasi ulang.");
+// ======================= EKSPOR DATABASE KE .SQL =======================
+function exportSQL() {
+  const tables = ["users", "books", "borrowings"];
+  let sqlDump = "";
+  for (const table of tables) {
+    const rows = query(`SELECT * FROM ${table}`);
+    if (rows.length === 0) continue;
+    const columns = Object.keys(rows[0]);
+    sqlDump += `-- Table: ${table}\n`;
+    sqlDump += `DROP TABLE IF EXISTS ${table};\n`;
+    const createStmt = db.exec(`SELECT sql FROM sqlite_master WHERE type='table' AND name='${table}'`);
+    if (createStmt.length && createStmt[0].values.length) {
+      sqlDump += createStmt[0].values[0][0] + ";\n";
     }
-  } else {
-    authContainer.style.display = "flex";
-    dashboardContainer.style.display = "none";
-    currentUser = null;
-    currentRole = null;
-    authInfo.innerText = "Pastikan metode login Email/Password sudah diaktifkan di Firebase Console.";
+    for (const row of rows) {
+      const values = columns.map(col => {
+        let val = row[col];
+        if (val === null || val === undefined) return "NULL";
+        if (typeof val === "string") return `'${val.replace(/'/g, "''")}'`;
+        return val;
+      });
+      sqlDump += `INSERT INTO ${table} (${columns.join(",")}) VALUES (${values.join(",")});\n`;
+    }
+    sqlDump += "\n";
   }
-});
+  const blob = new Blob([sqlDump], {type: "application/sql"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "pustaka_database.sql";
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
 
-// Toggle Login/Register
-const modeTabs = document.querySelectorAll(".mode-tab");
+// ======================= AUTH STATE & STARTUP =======================
+function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+
+async function startApp() {
+  await initDB();
+  // Tampilkan login jika belum login
+  const loggedUser = localStorage.getItem("current_user");
+  if (loggedUser) {
+    try {
+      const user = JSON.parse(loggedUser);
+      const verify = query("SELECT * FROM users WHERE id = ?", [user.id]);
+      if (verify.length && verify[0].password === user.password) {
+        currentUser = { email: verify[0].email, uid: verify[0].id };
+        currentUserData = verify[0];
+        currentRole = currentUserData.role;
+        userNameDisplay.innerText = currentUserData.username;
+        userRoleDisplay.innerText = currentRole === "admin" ? "Administrator" : "Anggota";
+        authContainer.style.display = "none";
+        dashboardContainer.style.display = "block";
+        if (currentRole === "admin") renderAdminDashboard();
+        else renderAnggotaDashboard();
+        return;
+      }
+    } catch(e) {}
+  }
+  authContainer.style.display = "flex";
+  dashboardContainer.style.display = "none";
+  authInfo.innerText = "Aplikasi berjalan offline sepenuhnya dengan SQLite.";
+}
+
+// Login / Register Events
+modeTabs = document.querySelectorAll(".mode-tab");
 modeTabs.forEach(tab => {
   tab.addEventListener("click", () => {
     modeTabs.forEach(t => t.classList.remove("active"));
@@ -465,7 +585,17 @@ authSubmitBtn.addEventListener("click", async () => {
   const password = loginPassword.value;
   if (!username || !password) return authError.innerText = "Isi username & password";
   try {
-    await loginWithUsername(username, password, selectedLoginRole);
+    const user = await loginWithUsername(username, password, selectedLoginRole);
+    currentUser = { email: user.email, uid: user.id };
+    currentUserData = user;
+    currentRole = user.role;
+    localStorage.setItem("current_user", JSON.stringify({ id: user.id, password: user.password }));
+    userNameDisplay.innerText = user.username;
+    userRoleDisplay.innerText = user.role === "admin" ? "Administrator" : "Anggota";
+    authContainer.style.display = "none";
+    dashboardContainer.style.display = "block";
+    if (user.role === "admin") renderAdminDashboard();
+    else renderAnggotaDashboard();
   } catch (err) {
     authError.innerText = err.message;
   }
@@ -494,5 +624,16 @@ registerBtn.addEventListener("click", async () => {
   }
 });
 
-logoutBtn.addEventListener("click", () => signOut(auth));
-backToLoginBtn.addEventListener("click", () => signOut(auth));
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("current_user");
+  authContainer.style.display = "flex";
+  dashboardContainer.style.display = "none";
+  currentUser = null;
+});
+backToLoginBtn.addEventListener("click", () => {
+  localStorage.removeItem("current_user");
+  authContainer.style.display = "flex";
+  dashboardContainer.style.display = "none";
+});
+
+startApp();

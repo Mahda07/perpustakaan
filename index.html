@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- SQL.js for offline SQLite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 </head>
 <body>
 <!-- Auth Container -->
@@ -59,7 +61,9 @@
       </div>
     </div>
     <div id="menuContainer" class="menu-grid"></div>
-    <div class="content-panel" id="contentPanel"></div>
+    <div class="content-panel" id="contentPanel">
+      <!-- Tombol ekspor akan muncul di sini untuk admin -->
+    </div>
   </div>
 </div>
 
@@ -75,6 +79,6 @@
   </div>
 </div>
 
-<script type="module" src="main.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
