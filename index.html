@@ -36,8 +36,10 @@
       <input type="email" id="regEmail" placeholder="Email">
       <select id="regKelas">
         <option value="">Pilih Kelas</option>
-        <option>X RPL </option><option>XI RPL </option><option>
-        <option>XI RPL</option><option>XII RPL </option>
+        <option>X IPA 1</option><option>X IPA 2</option>
+        <option>XI IPA 1</option><option>XI IPA 2</option>
+        <option>XII IPA 1</option><option>XII IPA 2</option>
+        <option>X IPS 1</option><option>X IPS 2</option>
       </select>
       <div class="password-wrapper">
         <input type="password" id="regPassword" placeholder="Password">
@@ -58,7 +60,11 @@
 <div id="dashboardContainer" style="display: none;">
   <div class="dashboard-container">
     <div class="header">
-      <div class="user-info"><i class="fas fa-user-circle fa-2x"></i><span id="userNameDisplay"></span> (<span id="userRoleDisplay"></span>) <span id="userKelasDisplay" style="font-size:0.8rem;"></span></div>
+      <div class="user-info">
+        <i class="fas fa-user-circle fa-2x"></i>
+        <span id="userNameDisplay"></span> (<span id="userRoleDisplay"></span>)
+        <span id="userKelasDisplay"></span>
+      </div>
       <div>
         <button class="btn-header" id="changePasswordBtn"><i class="fas fa-key"></i> Ubah Password</button>
         <button class="back-btn btn-header" id="backToLoginBtn"><i class="fas fa-arrow-left"></i> Kembali</button>

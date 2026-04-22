@@ -124,6 +124,7 @@ body {
   margin-bottom: 2rem;
   color: white;
   flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .user-info {
@@ -197,19 +198,31 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 1rem;
 }
 
-th, td {
-  padding: 0.75rem;
+th {
+  background: #ffedd5;
+  color: #7c2d12;
+  padding: 0.8rem;
   text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+}
+
+td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+tr:hover td {
+  background: #fef9e6;
 }
 
 .fine-badge {
   background: #fee2e2;
   color: #b91c1c;
-  padding: 0.2rem 0.5rem;
-  border-radius: 1rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  font-weight: 600;
 }
 
 .modal {
@@ -220,6 +233,7 @@ th, td {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
   align-items: center;
   justify-content: center;
   z-index: 1000;
@@ -238,6 +252,7 @@ th, td {
   padding: 0.5rem;
   margin: 0.5rem 0;
   border-radius: 1rem;
+  border: 1px solid #ccc;
 }
 
 .books-grid {
@@ -248,18 +263,18 @@ th, td {
 }
 
 .book-card {
-  background: #fef9f0;
+  background: white;
   border-radius: 1rem;
   padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 @media (max-width: 700px) {
   .menu-card {
     width: 120px;
-    font-size: 0.8rem;
   }
-
   th, td {
     font-size: 0.7rem;
+    padding: 0.5rem;
   }
 }
