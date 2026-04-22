@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pustaka Digital - Perpustakaan Sekolah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
 <body class="min-h-screen flex items-center justify-center p-4">
     <div id="toastMsg" class="fixed bottom-5 right-5 text-white px-5 py-3 rounded-lg shadow-lg z-50 hidden transition"></div>
 
-    <!-- LOGIN & REGISTER CONTAINER -->
+    <!-- Login Container -->
     <div id="loginContainer" class="w-full max-w-md">
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
             <div class="bg-indigo-700 text-white py-4 text-center">
@@ -24,22 +24,25 @@
                 <p class="text-indigo-200 text-sm">Sistem Peminjaman Buku Online</p>
             </div>
             
-            <!-- Tab Selection -->
             <div class="flex border-b">
                 <button id="tabAdminBtn" class="flex-1 py-3 font-semibold transition tab-active">👑 Admin</button>
                 <button id="tabSiswaBtn" class="flex-1 py-3 font-semibold transition tab-inactive">📚 Siswa</button>
             </div>
 
-            <!-- Panel Admin Login -->
+            <!-- Panel Admin Login (Username + Password) -->
             <div id="panelAdmin" class="p-6 space-y-4">
-                <div class="text-center text-sm text-gray-500 mb-2">Masuk sebagai Administrator</div>
-                <input type="email" id="adminEmail" placeholder="Email Admin" value="admin@perpustakaan.com" class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-400">
-                <input type="password" id="adminPassword" placeholder="Password" value="admin123" class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-400">
-                <button onclick="loginAdmin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition"><i class="fas fa-sign-in-alt mr-2"></i> Login Admin</button>
-                <p class="text-xs text-center text-gray-400 mt-2">Default: admin@perpustakaan.com / admin123</p>
+                <div class="text-center text-sm text-gray-500">Masuk sebagai Administrator</div>
+                <input type="text" id="adminUsername" placeholder="Username Admin" value="admin" class="w-full border rounded-lg p-3">
+                <input type="password" id="adminPassword" placeholder="Password" value="admin123" class="w-full border rounded-lg p-3">
+                <button onclick="loginWithUsername('admin')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition">Login Admin</button>
+                <div class="flex gap-2">
+                    <button id="resetAdminBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm">⚠️ Reset Admin (Buat Ulang)</button>
+                </div>
+                <p class="text-xs text-center text-gray-400">Default: username = admin , password = admin123</p>
+                <div id="adminError" class="text-red-500 text-xs text-center hidden bg-red-50 p-2 rounded"></div>
             </div>
 
-            <!-- Panel Siswa Login & Register -->
+            <!-- Panel Siswa (Login & Register dengan Username) -->
             <div id="panelSiswa" class="p-6 space-y-4 hidden">
                 <div class="flex border-b mb-4">
                     <button id="siswaLoginTab" class="flex-1 py-2 text-center font-medium text-indigo-600 border-b-2 border-indigo-600">Login Siswa</button>
@@ -47,31 +50,29 @@
                 </div>
                 <!-- Form Login Siswa -->
                 <div id="siswaLoginForm" class="space-y-4">
-                    <input type="email" id="siswaEmail" placeholder="Email Siswa" class="w-full border rounded-lg p-3">
+                    <input type="text" id="siswaUsername" placeholder="Username" class="w-full border rounded-lg p-3">
                     <input type="password" id="siswaPassword" placeholder="Password" class="w-full border rounded-lg p-3">
-                    <button onclick="loginSiswa()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition"><i class="fas fa-user-graduate mr-2"></i> Login Siswa</button>
+                    <button onclick="loginWithUsername('siswa')" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition">Login Siswa</button>
                 </div>
-                <!-- Form Register Siswa -->
+                <!-- Form Register Siswa (Username, Nama, NIS, Password) -->
                 <div id="siswaRegisterForm" class="space-y-4 hidden">
+                    <input type="text" id="regUsername" placeholder="Username (unik)" class="w-full border rounded-lg p-3">
                     <input type="text" id="regNama" placeholder="Nama Lengkap" class="w-full border rounded-lg p-3">
                     <input type="text" id="regNis" placeholder="NIS" class="w-full border rounded-lg p-3">
-                    <input type="email" id="regEmailSiswa" placeholder="Email" class="w-full border rounded-lg p-3">
                     <input type="password" id="regPasswordSiswa" placeholder="Password" class="w-full border rounded-lg p-3">
-                    <button onclick="registerSiswa()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"><i class="fas fa-user-plus mr-2"></i> Daftar Akun</button>
+                    <button onclick="registerSiswa()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">Daftar Akun</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN APP (setelah login) -->
-    <div id="appContainer" class="hidden min-h-screen w-full">
-        <!-- akan diisi dengan layout sidebar + konten, sama seperti sebelumnya -->
-    </div>
+    <!-- Main App Container (setelah login) -->
+    <div id="appContainer" class="hidden min-h-screen w-full"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getFirestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, query, where, Timestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfqZD7UZZt-GWmtNhfJyksrv3-8ENRjto",
@@ -83,54 +84,232 @@
             measurementId: "G-EVVQ80Q08C"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // ---------- BUAT ADMIN DEFAULT JIKA BELUM ADA ----------
-        async function createDefaultAdmin() {
-            const adminEmail = "admin@perpustakaan.com";
-            const adminPass = "admin123";
-            const adminQuery = query(collection(db, "users"), where("role", "==", "admin"));
-            const snapshot = await getDocs(adminQuery);
-            if (snapshot.empty) {
-                try {
-                    let userCred;
-                    try {
-                        userCred = await createUserWithEmailAndPassword(auth, adminEmail, adminPass);
-                    } catch (e) {
-                        if (e.code === 'auth/email-already-in-use') {
-                            userCred = await signInWithEmailAndPassword(auth, adminEmail, adminPass);
-                        } else throw e;
-                    }
-                    const uid = userCred.user.uid;
-                    const userCheck = query(collection(db, "users"), where("uid", "==", uid));
-                    const exist = await getDocs(userCheck);
-                    if (exist.empty) {
-                        await addDoc(collection(db, "users"), { uid, email: adminEmail, name: "Administrator Utama", nis: "ADMIN001", role: "admin" });
-                    } else {
-                        await updateDoc(exist.docs[0].ref, { role: "admin", name: "Administrator Utama" });
-                    }
-                    console.log("Admin default siap");
-                } catch (err) { console.error(err); }
-            }
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch(e) {
+            alert("Gagal init Firebase: " + e.message);
         }
-        createDefaultAdmin();
 
-        // ---------- GLOBAL VARIABLES ----------
-        let currentUserObj = null, currentUserRole = null, currentUserDocId = null;
-
-        // Fungsi showToast
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toastMsg');
             toast.innerText = msg;
-            toast.classList.remove('hidden', 'bg-red-500', 'bg-green-500', 'bg-blue-500');
+            toast.classList.remove('hidden', 'bg-red-500', 'bg-green-500');
             toast.classList.add(type === 'error' ? 'bg-red-500' : 'bg-green-500');
             toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
+            setTimeout(() => toast.classList.add('hidden'), 4000);
         }
 
-        // ---------- RENDER APLIKASI UTAMA (SAMA SEPERTI SEBELUMNYA) ----------
+        // Helper: Generate email dari username (untuk keperluan Firebase Auth)
+        function usernameToEmail(username) {
+            return username + "@pustakaapp.com";
+        }
+
+        // Fungsi login dengan username (admin atau siswa)
+        window.loginWithUsername = async (roleType) => {
+            let username, password;
+            if (roleType === 'admin') {
+                username = document.getElementById('adminUsername').value.trim();
+                password = document.getElementById('adminPassword').value;
+            } else {
+                username = document.getElementById('siswaUsername').value.trim();
+                password = document.getElementById('siswaPassword').value;
+            }
+            if (!username || !password) {
+                showToast("Username dan password harus diisi", "error");
+                return;
+            }
+            try {
+                // Cari user berdasarkan username di Firestore
+                const userQuery = query(collection(db, "users"), where("username", "==", username));
+                const snapshot = await getDocs(userQuery);
+                if (snapshot.empty) {
+                    showToast("Username tidak ditemukan", "error");
+                    return;
+                }
+                const userData = snapshot.docs[0].data();
+                // Role harus sesuai dengan tab yang dipilih
+                if (roleType === 'admin' && userData.role !== 'admin') {
+                    showToast("Akun ini bukan admin", "error");
+                    return;
+                }
+                if (roleType === 'siswa' && userData.role !== 'user') {
+                    showToast("Akun ini bukan siswa", "error");
+                    return;
+                }
+                // Login dengan email (yang tersimpan di userData)
+                const email = userData.email;
+                await signInWithEmailAndPassword(auth, email, password);
+                showToast("Login berhasil");
+            } catch (error) {
+                console.error(error);
+                let msg = "Login gagal: ";
+                if (error.code === 'auth/wrong-password') msg += "Password salah";
+                else if (error.code === 'auth/user-not-found') msg += "Username tidak valid";
+                else msg += error.message;
+                showToast(msg, "error");
+                if (roleType === 'admin') {
+                    document.getElementById('adminError').innerText = msg;
+                    document.getElementById('adminError').classList.remove('hidden');
+                }
+            }
+        };
+
+        // Registrasi siswa dengan username
+        window.registerSiswa = async () => {
+            const username = document.getElementById('regUsername').value.trim();
+            const nama = document.getElementById('regNama').value.trim();
+            const nis = document.getElementById('regNis').value.trim();
+            const password = document.getElementById('regPasswordSiswa').value;
+            if (!username || !nama || !nis || !password) {
+                showToast("Semua field harus diisi", "error");
+                return;
+            }
+            if (password.length < 6) {
+                showToast("Password minimal 6 karakter", "error");
+                return;
+            }
+            try {
+                // Cek apakah username sudah ada
+                const userQuery = query(collection(db, "users"), where("username", "==", username));
+                const snapshot = await getDocs(userQuery);
+                if (!snapshot.empty) {
+                    showToast("Username sudah digunakan", "error");
+                    return;
+                }
+                // Buat email dari username
+                const email = usernameToEmail(username);
+                // Buat akun di Firebase Auth
+                const userCred = await createUserWithEmailAndPassword(auth, email, password);
+                // Simpan data user ke Firestore (termasuk username)
+                await addDoc(collection(db, "users"), {
+                    uid: userCred.user.uid,
+                    username: username,
+                    email: email,
+                    name: nama,
+                    nis: nis,
+                    role: "user"
+                });
+                showToast("Registrasi berhasil! Silakan login.", "success");
+                // Reset form dan pindah ke login siswa
+                document.getElementById('siswaLoginTab').click();
+            } catch (error) {
+                console.error(error);
+                let msg = "Registrasi gagal: ";
+                if (error.code === 'auth/email-already-in-use') msg += "Email sudah terdaftar (coba username lain)";
+                else if (error.code === 'auth/operation-not-allowed') msg += "Aktifkan metode Email/Password di Firebase Console";
+                else msg += error.message;
+                showToast(msg, "error");
+            }
+        };
+
+        // Membuat ulang akun admin (reset) dengan username 'admin'
+        async function recreateAdminAccount() {
+            const adminUsername = "admin";
+            const adminPassword = "admin123";
+            const adminEmail = usernameToEmail(adminUsername); // admin@pustakaapp.com
+            try {
+                // Hapus data admin dari Firestore (semua dokumen dengan role admin)
+                const adminQuery = query(collection(db, "users"), where("role", "==", "admin"));
+                const snapshot = await getDocs(adminQuery);
+                const batch = writeBatch(db);
+                snapshot.docs.forEach(docSnap => batch.delete(docSnap.ref));
+                await batch.commit();
+                
+                // Hapus akun Firebase Auth yang terkait dengan email admin
+                try {
+                    const userCred = await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+                    await deleteUser(userCred.user);
+                } catch(e) { /* tidak masalah jika tidak ada */ }
+                
+                // Buat akun admin baru
+                const userCred = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
+                await addDoc(collection(db, "users"), {
+                    uid: userCred.user.uid,
+                    username: adminUsername,
+                    email: adminEmail,
+                    name: "Administrator Utama",
+                    nis: "ADMIN001",
+                    role: "admin"
+                });
+                showToast("Admin berhasil direset! Silakan login dengan username: admin , password: admin123", "success");
+                setTimeout(() => location.reload(), 1500);
+            } catch (error) {
+                console.error(error);
+                let msg = "Reset admin gagal: ";
+                if (error.code === 'auth/operation-not-allowed') {
+                    msg += "Harap aktifkan metode masuk Email/Password di Firebase Console.";
+                } else {
+                    msg += error.message;
+                }
+                showToast(msg, 'error');
+                document.getElementById('adminError').innerText = msg;
+                document.getElementById('adminError').classList.remove('hidden');
+            }
+        }
+
+        // Membuat admin default jika belum ada (saat pertama kali)
+        async function ensureAdminAccount() {
+            const adminUsername = "admin";
+            const adminPassword = "admin123";
+            const adminEmail = usernameToEmail(adminUsername);
+            try {
+                // Cek apakah sudah ada admin di Firestore
+                const adminQuery = query(collection(db, "users"), where("role", "==", "admin"));
+                const snapshot = await getDocs(adminQuery);
+                if (!snapshot.empty) return; // Sudah ada admin
+                
+                // Tidak ada admin, coba buat
+                try {
+                    // Coba login dulu (mungkin Auth sudah ada tapi Firestore belum)
+                    const userCred = await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+                    await addDoc(collection(db, "users"), {
+                        uid: userCred.user.uid,
+                        username: adminUsername,
+                        email: adminEmail,
+                        name: "Administrator Utama",
+                        nis: "ADMIN001",
+                        role: "admin"
+                    });
+                    showToast("Admin default dipulihkan. Silakan login.", "success");
+                } catch (loginError) {
+                    if (loginError.code === 'auth/user-not-found') {
+                        const userCred = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
+                        await addDoc(collection(db, "users"), {
+                            uid: userCred.user.uid,
+                            username: adminUsername,
+                            email: adminEmail,
+                            name: "Administrator Utama",
+                            nis: "ADMIN001",
+                            role: "admin"
+                        });
+                        showToast("Akun admin default berhasil dibuat. Silakan login.", "success");
+                    } else {
+                        throw loginError;
+                    }
+                }
+            } catch (error) {
+                console.error("Gagal setup admin:", error);
+                let msg = "Setup admin gagal: ";
+                if (error.code === 'auth/operation-not-allowed') {
+                    msg += "Aktifkan metode masuk Email/Password di Firebase Console (Authentication → Sign-in methods).";
+                } else {
+                    msg += error.message;
+                }
+                showToast(msg, 'error');
+                document.getElementById('adminError').innerText = msg;
+                document.getElementById('adminError').classList.remove('hidden');
+            }
+        }
+
+        // Panggil ensureAdminAccount saat halaman dimuat
+        setTimeout(() => ensureAdminAccount(), 1000);
+
+        // ======================== BAGIAN UTAMA APLIKASI (CRUD, TRANSAKSI, DLL) ========================
+        let currentUserObj = null, currentUserRole = null, currentUserDocId = null;
+
         function renderMainApp() {
             const appHtml = `
             <div class="min-h-screen flex flex-col md:flex-row">
@@ -140,7 +319,7 @@
                     <div class="pt-10 border-t border-indigo-600 text-sm">
                         <div><i class="fas fa-user-circle"></i> <span id="userInfoSpan"></span></div>
                         <div><i class="fas fa-tag"></i> <span id="userRoleSpan"></span></div>
-                        <button onclick="logout()" class="mt-3 w-full bg-red-500 py-2 rounded-lg"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        <button onclick="window.logout()" class="mt-3 w-full bg-red-500 py-2 rounded-lg">Logout</button>
                     </div>
                 </aside>
                 <main class="flex-1 p-6 bg-gray-100">
@@ -149,12 +328,10 @@
                 </main>
             </div>`;
             document.getElementById('appContainer').innerHTML = appHtml;
-            // Re-attach global logout
             window.logout = async () => { await signOut(auth); location.reload(); };
-            // Menu dinamis & konten akan diisi setelah role diketahui
         }
 
-        // Fungsi CRUD dan lainnya (sama seperti kode sebelumnya, disederhanakan namun lengkap)
+        // Fungsi CRUD Buku, Anggota, Transaksi (sama seperti sebelumnya, tapi disesuaikan)
         async function loadBooks(search = '') {
             const snapshot = await getDocs(collection(db, 'books'));
             let books = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -163,200 +340,208 @@
         }
 
         async function renderBooksManagement() {
-            mainContent.innerHTML = `<div class="bg-white rounded-xl shadow p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold"><i class="fas fa-book"></i> Manajemen Buku</h2><button id="addBookBtn" class="bg-indigo-600 text-white px-4 py-2 rounded"><i class="fas fa-plus"></i> Tambah Buku</button></div><div class="mb-4"><input type="text" id="searchBookInput" placeholder="Cari judul/pengarang..." class="border p-2 rounded w-full md:w-64"><button id="searchBookBtn" class="ml-2 bg-gray-600 text-white px-4 py-2 rounded">Cari</button></div><div id="booksTableContainer">Loading...</div></div>`;
+            const main = document.getElementById('mainContent');
+            main.innerHTML = `<div class="bg-white rounded-xl shadow p-6"><div class="flex justify-between"><h2 class="text-xl font-bold">📚 Buku</h2><button id="addBookBtn" class="bg-indigo-600 text-white px-3 py-1 rounded">+ Buku</button></div><input id="searchBook" placeholder="Cari..." class="border p-2 my-2 w-full"><div id="booksList"></div></div>`;
             await refreshBooksTable();
             document.getElementById('addBookBtn').onclick = () => showBookForm();
-            document.getElementById('searchBookBtn').onclick = async () => refreshBooksTable(document.getElementById('searchBookInput').value);
+            document.getElementById('searchBook').oninput = async () => refreshBooksTable(document.getElementById('searchBook').value);
         }
         async function refreshBooksTable(search = '') {
             const books = await loadBooks(search);
-            const container = document.getElementById('booksTableContainer');
-            if (!books.length) { container.innerHTML = '<p>Tidak ada buku.</p>'; return; }
-            let html = `<table class="min-w-full border"><thead><tr class="bg-gray-100"><th>Judul</th><th>Pengarang</th><th>Tahun</th><th>Stok</th><th>Aksi</th></tr></thead><tbody>`;
+            const container = document.getElementById('booksList');
+            if (!books.length) { container.innerHTML = '<p>Tidak ada buku</p>'; return; }
+            let html = `<table class="w-full border"><thead><tr class="bg-gray-100"><th>Judul</th><th>Pengarang</th><th>Stok</th><th>Aksi</th></tr></thead><tbody>`;
             books.forEach(b => {
-                html += `<tr><td class="p-2">${b.title}</td><td>${b.author}</td><td>${b.year}</td><td>${b.stock}</td><td><button class="editBook bg-yellow-500 px-2 py-1 rounded" data-id="${b.id}">Edit</button> <button class="deleteBook bg-red-500 px-2 py-1 rounded" data-id="${b.id}">Hapus</button></td></tr>`;
+                html += `<tr><td class="p-2">${b.title}</td><td>${b.author}</td><td>${b.stock}</td><td><button class="editBook bg-yellow-500 px-2 rounded" data-id="${b.id}">Edit</button> <button class="deleteBook bg-red-500 px-2 rounded" data-id="${b.id}">Hapus</button></td></tr>`;
             });
-            html += `</tbody></table>`;
+            html += `</tbody></tr>`;
             container.innerHTML = html;
-            document.querySelectorAll('.editBook').forEach(btn => btn.addEventListener('click', () => showBookForm(btn.dataset.id)));
-            document.querySelectorAll('.deleteBook').forEach(btn => btn.addEventListener('click', async () => { if(confirm('Yakin hapus?')) await deleteDoc(doc(db,'books',btn.dataset.id)); await refreshBooksTable(); }));
+            document.querySelectorAll('.editBook').forEach(btn => btn.onclick = () => showBookForm(btn.dataset.id));
+            document.querySelectorAll('.deleteBook').forEach(btn => btn.onclick = async () => { if(confirm('Hapus?')) await deleteDoc(doc(db,'books',btn.dataset.id)); await refreshBooksTable(); });
         }
-        async function showBookForm(id=null) {
-            let data = { title:'', author:'', year:'', stock:0 };
-            if(id) { const snap = await getDoc(doc(db,'books',id)); if(snap.exists()) data = snap.data(); }
-            const html = `<div id="bookModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"><div class="bg-white p-6 rounded w-96"><h3 class="font-bold">${id?'Edit':'Tambah'} Buku</h3><input id="title" placeholder="Judul" value="${data.title}" class="border p-2 w-full my-2"><input id="author" placeholder="Pengarang" value="${data.author}" class="border p-2 w-full my-2"><input id="year" placeholder="Tahun" value="${data.year}" class="border p-2 w-full my-2"><input id="stock" placeholder="Stok" value="${data.stock}" type="number" class="border p-2 w-full my-2"><div class="flex justify-end gap-2"><button id="cancelModal" class="bg-gray-400 px-3 py-1 rounded">Batal</button><button id="saveBtn" class="bg-indigo-600 text-white px-3 py-1 rounded">Simpan</button></div></div></div>`;
+        async function showBookForm(id = null) {
+            let data = { title: '', author: '', year: '', stock: 0 };
+            if (id) { const snap = await getDoc(doc(db, 'books', id)); if (snap.exists()) data = snap.data(); }
+            const html = `<div id="modal" class="fixed inset-0 bg-black/50 flex justify-center items-center"><div class="bg-white p-5 rounded w-96"><h3>${id ? 'Edit' : 'Tambah'} Buku</h3><input id="title" placeholder="Judul" value="${data.title}" class="border p-2 w-full my-1"><input id="author" placeholder="Pengarang" value="${data.author}" class="border p-2 w-full my-1"><input id="year" placeholder="Tahun" value="${data.year}" class="border p-2 w-full my-1"><input id="stock" placeholder="Stok" value="${data.stock}" class="border p-2 w-full my-1" type="number"><div class="flex justify-end gap-2 mt-3"><button id="cancelModal" class="bg-gray-400 px-3 py-1 rounded">Batal</button><button id="saveModal" class="bg-indigo-600 text-white px-3 py-1 rounded">Simpan</button></div></div></div>`;
             document.body.insertAdjacentHTML('beforeend', html);
-            document.getElementById('cancelModal').onclick = () => document.getElementById('bookModal').remove();
-            document.getElementById('saveBtn').onclick = async () => {
-                const newData = { title:document.getElementById('title').value, author:document.getElementById('author').value, year:document.getElementById('year').value, stock:parseInt(document.getElementById('stock').value)||0 };
-                if(id) await updateDoc(doc(db,'books',id), newData);
-                else await addDoc(collection(db,'books'), newData);
-                document.getElementById('bookModal').remove();
+            document.getElementById('cancelModal').onclick = () => document.getElementById('modal').remove();
+            document.getElementById('saveModal').onclick = async () => {
+                const newData = { title: document.getElementById('title').value, author: document.getElementById('author').value, year: document.getElementById('year').value, stock: parseInt(document.getElementById('stock').value) || 0 };
+                if (id) await updateDoc(doc(db, 'books', id), newData);
+                else await addDoc(collection(db, 'books'), newData);
+                document.getElementById('modal').remove();
                 await refreshBooksTable();
                 showToast('Buku tersimpan');
             };
         }
 
         async function renderMembersManagement() {
-            mainContent.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Kelola Anggota</h2><button id="addMemberBtn" class="bg-indigo-600 text-white px-4 py-2 rounded my-2">Tambah Anggota</button><div id="membersList"></div></div>`;
+            const main = document.getElementById('mainContent');
+            main.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Anggota</h2><button id="addMemberBtn" class="bg-indigo-600 text-white px-3 py-1 rounded my-2">Tambah Anggota</button><div id="membersList"></div></div>`;
             await refreshMembers();
             document.getElementById('addMemberBtn').onclick = () => showMemberForm();
         }
         async function refreshMembers() {
-            const q = query(collection(db,'users'), where('role','==','user'));
+            const q = query(collection(db, 'users'), where('role', '==', 'user'));
             const snap = await getDocs(q);
-            const members = snap.docs.map(d => ({id:d.id, ...d.data()}));
+            const members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             const container = document.getElementById('membersList');
-            if(!members.length) { container.innerHTML='<p>Belum ada anggota.</p>'; return; }
-            let html = `<table class="w-full border"><thead><tr><th>Nama</th><th>Email</th><th>NIS</th><th>Aksi</th></tr></thead><tbody>`;
-            members.forEach(m => { html += `<tr><td>${m.name}</td><td>${m.email}</td><td>${m.nis}</td><td><button class="delMember bg-red-500 px-2 py-1 rounded text-white" data-id="${m.id}">Hapus</button></td></tr>`; });
-            html+=`</tbody></table>`;
+            if (!members.length) { container.innerHTML = '<p>Belum ada anggota</p>'; return; }
+            let html = `<table class="w-full border"><thead><tr><th>Username</th><th>Nama</th><th>NIS</th><th>Aksi</th></tr></thead><tbody>`;
+            members.forEach(m => { html += `<tr><td class="p-2">${m.username}</td><td>${m.name}</td><td>${m.nis}</td><td><button class="delMember bg-red-500 px-2 rounded text-white" data-id="${m.id}">Hapus</button></td></tr>`; });
+            html += `</tbody></table>`;
             container.innerHTML = html;
-            document.querySelectorAll('.delMember').forEach(btn => btn.addEventListener('click', async () => { if(confirm('Hapus anggota?')) await deleteDoc(doc(db,'users',btn.dataset.id)); await refreshMembers(); }));
+            document.querySelectorAll('.delMember').forEach(btn => btn.onclick = async () => { if(confirm('Hapus anggota?')) await deleteDoc(doc(db,'users',btn.dataset.id)); await refreshMembers(); });
         }
         async function showMemberForm() {
-            const html = `<div id="memberModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"><div class="bg-white p-6 rounded w-96"><h3 class="font-bold">Tambah Anggota</h3><input id="name" placeholder="Nama" class="border p-2 w-full my-2"><input id="nis" placeholder="NIS" class="border p-2 w-full my-2"><input id="email" placeholder="Email" class="border p-2 w-full my-2"><input id="pass" type="password" placeholder="Password" class="border p-2 w-full my-2"><div class="flex justify-end gap-2"><button id="cancelModal" class="bg-gray-400 px-3 py-1 rounded">Batal</button><button id="saveMember" class="bg-indigo-600 text-white px-3 py-1 rounded">Simpan</button></div></div></div>`;
+            const html = `<div id="modal" class="fixed inset-0 bg-black/50 flex justify-center items-center"><div class="bg-white p-5 rounded w-96"><h3>Tambah Anggota</h3><input id="username" placeholder="Username" class="border p-2 w-full my-1"><input id="name" placeholder="Nama Lengkap" class="border p-2 w-full my-1"><input id="nis" placeholder="NIS" class="border p-2 w-full my-1"><input id="pass" type="password" placeholder="Password" class="border p-2 w-full my-1"><div class="flex justify-end gap-2 mt-3"><button id="cancelModal" class="bg-gray-400 px-3 py-1 rounded">Batal</button><button id="saveMember" class="bg-indigo-600 text-white px-3 py-1 rounded">Simpan</button></div></div></div>`;
             document.body.insertAdjacentHTML('beforeend', html);
-            document.getElementById('cancelModal').onclick = () => document.getElementById('memberModal').remove();
+            document.getElementById('cancelModal').onclick = () => document.getElementById('modal').remove();
             document.getElementById('saveMember').onclick = async () => {
-                const name = document.getElementById('name').value, nis = document.getElementById('nis').value, email = document.getElementById('email').value, pass = document.getElementById('pass').value;
-                if(!email||!pass) { showToast('Email & password wajib','error'); return; }
+                const username = document.getElementById('username').value.trim();
+                const name = document.getElementById('name').value.trim();
+                const nis = document.getElementById('nis').value.trim();
+                const pass = document.getElementById('pass').value;
+                if (!username || !name || !nis || !pass) { showToast('Semua field harus diisi', 'error'); return; }
+                const email = usernameToEmail(username);
                 try {
                     const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-                    await addDoc(collection(db,'users'), { uid:userCred.user.uid, email, name, nis, role:'user' });
+                    await addDoc(collection(db, 'users'), { uid: userCred.user.uid, username, email, name, nis, role: 'user' });
                     showToast('Anggota ditambahkan');
-                    document.getElementById('memberModal').remove();
+                    document.getElementById('modal').remove();
                     await refreshMembers();
-                } catch(e) { showToast(e.message,'error'); }
+                } catch (e) { showToast(e.message, 'error'); }
             };
         }
 
         async function renderTransactionsManagement() {
-            mainContent.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Transaksi Peminjaman</h2><button id="newLoanBtn" class="bg-green-600 text-white px-4 py-2 rounded my-2">+ Pinjam Buku</button><div id="transList"></div></div>`;
+            const main = document.getElementById('mainContent');
+            main.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Transaksi</h2><button id="newLoanBtn" class="bg-green-600 text-white px-3 py-1 rounded my-2">+ Pinjam Buku</button><div id="transList"></div></div>`;
             await refreshTransactions();
             document.getElementById('newLoanBtn').onclick = () => showLoanForm();
         }
         async function refreshTransactions() {
-            const snap = await getDocs(collection(db,'transactions'));
+            const snap = await getDocs(collection(db, 'transactions'));
             let trans = [];
-            for(const d of snap.docs) {
+            for (const d of snap.docs) {
                 const data = d.data();
-                const user = await getDoc(doc(db,'users',data.userId));
-                const book = await getDoc(doc(db,'books',data.bookId));
-                trans.push({ id:d.id, userName:user.exists()?user.data().name:'-', bookTitle:book.exists()?book.data().title:'-', date:data.borrowDate?.toDate().toLocaleDateString(), status:data.status });
+                const user = await getDoc(doc(db, 'users', data.userId));
+                const book = await getDoc(doc(db, 'books', data.bookId));
+                trans.push({ id: d.id, userName: user.exists() ? user.data().username : '-', bookTitle: book.exists() ? book.data().title : '-', date: data.borrowDate?.toDate().toLocaleDateString(), status: data.status });
             }
             const container = document.getElementById('transList');
-            if(!trans.length) { container.innerHTML='<p>Belum ada transaksi.</p>'; return; }
+            if (!trans.length) { container.innerHTML = '<p>Belum ada transaksi</p>'; return; }
             let html = `<table class="w-full border"><thead><tr><th>Peminjam</th><th>Buku</th><th>Tgl Pinjam</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`;
-            trans.forEach(t => { html += `<tr><td>${t.userName}</td><td>${t.bookTitle}</td><td>${t.date}</td><td>${t.status}</td><td>${t.status==='borrowed'?`<button class="returnTrans bg-blue-500 text-white px-2 py-1 rounded" data-id="${t.id}">Kembalikan</button>`:'-'}</td></tr>`; });
-            html+=`</tbody></table>`;
+            trans.forEach(t => {
+                html += `<tr><td class="p-2">${t.userName}</td><td>${t.bookTitle}</td><td>${t.date}</td><td>${t.status}</td><td>${t.status === 'borrowed' ? `<button class="returnTrans bg-blue-500 text-white px-2 rounded" data-id="${t.id}">Kembalikan</button>` : '-'}</td></tr>`;
+            });
+            html += `</tbody></table>`;
             container.innerHTML = html;
-            document.querySelectorAll('.returnTrans').forEach(btn => btn.addEventListener('click', async () => {
+            document.querySelectorAll('.returnTrans').forEach(btn => btn.onclick = async () => {
                 const id = btn.dataset.id;
-                const transRef = doc(db,'transactions',id);
+                const transRef = doc(db, 'transactions', id);
                 const data = (await getDoc(transRef)).data();
-                await updateDoc(transRef, { status:'returned', returnDate: Timestamp.now() });
-                const bookRef = doc(db,'books',data.bookId);
+                await updateDoc(transRef, { status: 'returned', returnDate: Timestamp.now() });
+                const bookRef = doc(db, 'books', data.bookId);
                 const book = await getDoc(bookRef);
-                if(book.exists()) await updateDoc(bookRef, { stock: book.data().stock + 1 });
-                showToast('Buku dikembalikan');
+                if (book.exists()) await updateDoc(bookRef, { stock: book.data().stock + 1 });
+                showToast('Dikembalikan');
                 await refreshTransactions();
-            }));
+            });
         }
         async function showLoanForm() {
-            const books = (await getDocs(collection(db,'books'))).docs.map(d => ({id:d.id, title:d.data().title, stock:d.data().stock})).filter(b=>b.stock>0);
-            const users = (await getDocs(query(collection(db,'users'), where('role','==','user')))).docs.map(d => ({id:d.id, name:d.data().name}));
-            const html = `<div id="loanModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"><div class="bg-white p-6 rounded w-96"><h3 class="font-bold">Peminjaman Baru</h3><select id="userId" class="border p-2 w-full my-2"><option value="">Pilih Anggota</option>${users.map(u=>`<option value="${u.id}">${u.name}</option>`)}</select><select id="bookId" class="border p-2 w-full my-2"><option value="">Pilih Buku</option>${books.map(b=>`<option value="${b.id}">${b.title} (Stok:${b.stock})</option>`)}</select><div class="flex justify-end gap-2"><button id="cancelLoan" class="bg-gray-400 px-3 py-1 rounded">Batal</button><button id="saveLoan" class="bg-indigo-600 text-white px-3 py-1 rounded">Pinjam</button></div></div></div>`;
+            const books = (await getDocs(collection(db, 'books'))).docs.map(d => ({ id: d.id, title: d.data().title, stock: d.data().stock })).filter(b => b.stock > 0);
+            const users = (await getDocs(query(collection(db, 'users'), where('role', '==', 'user')))).docs.map(d => ({ id: d.id, name: d.data().username }));
+            const html = `<div id="modal" class="fixed inset-0 bg-black/50 flex justify-center items-center"><div class="bg-white p-5 rounded w-96"><h3>Pinjam Buku</h3><select id="userId" class="border p-2 w-full my-1"><option value="">Pilih Anggota</option>${users.map(u => `<option value="${u.id}">${u.name}</option>`)}</select><select id="bookId" class="border p-2 w-full my-1"><option value="">Pilih Buku</option>${books.map(b => `<option value="${b.id}">${b.title} (Stok:${b.stock})</option>`)}</select><div class="flex justify-end gap-2 mt-3"><button id="cancelModal" class="bg-gray-400 px-3 py-1 rounded">Batal</button><button id="saveLoan" class="bg-indigo-600 text-white px-3 py-1 rounded">Pinjam</button></div></div></div>`;
             document.body.insertAdjacentHTML('beforeend', html);
-            document.getElementById('cancelLoan').onclick = () => document.getElementById('loanModal').remove();
+            document.getElementById('cancelModal').onclick = () => document.getElementById('modal').remove();
             document.getElementById('saveLoan').onclick = async () => {
                 const userId = document.getElementById('userId').value, bookId = document.getElementById('bookId').value;
-                if(!userId||!bookId) { showToast('Lengkapi data','error'); return; }
-                const bookRef = doc(db,'books',bookId);
+                if (!userId || !bookId) { showToast('Lengkapi data', 'error'); return; }
+                const bookRef = doc(db, 'books', bookId);
                 const book = await getDoc(bookRef);
-                if(book.data().stock <= 0) { showToast('Stok habis','error'); return; }
-                await addDoc(collection(db,'transactions'), { userId, bookId, borrowDate: Timestamp.now(), status:'borrowed' });
+                if (book.data().stock <= 0) { showToast('Stok habis', 'error'); return; }
+                await addDoc(collection(db, 'transactions'), { userId, bookId, borrowDate: Timestamp.now(), status: 'borrowed' });
                 await updateDoc(bookRef, { stock: book.data().stock - 1 });
                 showToast('Peminjaman berhasil');
-                document.getElementById('loanModal').remove();
+                document.getElementById('modal').remove();
                 await refreshTransactions();
             };
         }
 
         // USER SIDE
         async function renderUserDashboard() {
-            mainContent.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Daftar Buku</h2><input id="searchBookUser" placeholder="Cari buku..." class="border p-2 w-full my-2"><div id="userBooks"></div></div>`;
+            const main = document.getElementById('mainContent');
+            main.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">📖 Daftar Buku</h2><input id="searchUser" placeholder="Cari buku..." class="border p-2 w-full my-2"><div id="userBooksList"></div></div>`;
             await refreshUserBooks();
-            document.getElementById('searchBookUser').oninput = async () => refreshUserBooks(document.getElementById('searchBookUser').value);
+            document.getElementById('searchUser').oninput = () => refreshUserBooks(document.getElementById('searchUser').value);
         }
-        async function refreshUserBooks(search='') {
+        async function refreshUserBooks(search = '') {
             const books = await loadBooks(search);
-            const container = document.getElementById('userBooks');
-            if(!books.length) { container.innerHTML='<p>Buku tidak ditemukan</p>'; return; }
+            const container = document.getElementById('userBooksList');
+            if (!books.length) { container.innerHTML = '<p>Tidak ada buku</p>'; return; }
             let html = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
-            for(const b of books) {
-                html += `<div class="border p-4 rounded shadow"><h3 class="font-bold">${b.title}</h3><p>Pengarang: ${b.author}</p><p>Stok: ${b.stock}</p>${b.stock>0?`<button class="borrowBtn bg-indigo-600 text-white px-3 py-1 rounded mt-2" data-id="${b.id}">Pinjam</button>`:'<span class="text-red-500">Stok habis</span>'}</div>`;
+            for (const b of books) {
+                html += `<div class="border p-4 rounded shadow"><h3 class="font-bold">${b.title}</h3><p>${b.author} (${b.year})</p><p>Stok: ${b.stock}</p>${b.stock > 0 ? `<button class="borrowUser bg-indigo-600 text-white px-3 py-1 rounded mt-2" data-id="${b.id}">Pinjam</button>` : '<span class="text-red-500">Stok habis</span>'}</div>`;
             }
-            html+=`</div>`;
+            html += `</div>`;
             container.innerHTML = html;
-            document.querySelectorAll('.borrowBtn').forEach(btn => btn.addEventListener('click', async () => {
+            document.querySelectorAll('.borrowUser').forEach(btn => btn.onclick = async () => {
                 const bookId = btn.dataset.id;
-                const bookRef = doc(db,'books',bookId);
+                const bookRef = doc(db, 'books', bookId);
                 const book = await getDoc(bookRef);
-                if(book.data().stock <=0) { showToast('Stok habis','error'); return; }
-                const existing = await getDocs(query(collection(db,'transactions'), where('userId','==',currentUserDocId), where('bookId','==',bookId), where('status','==','borrowed')));
-                if(!existing.empty) { showToast('Anda sudah meminjam buku ini','error'); return; }
-                await addDoc(collection(db,'transactions'), { userId:currentUserDocId, bookId, borrowDate: Timestamp.now(), status:'borrowed' });
+                if (book.data().stock <= 0) { showToast('Stok habis', 'error'); return; }
+                const existing = await getDocs(query(collection(db, 'transactions'), where('userId', '==', currentUserDocId), where('bookId', '==', bookId), where('status', '==', 'borrowed')));
+                if (!existing.empty) { showToast('Anda sudah meminjam buku ini', 'error'); return; }
+                await addDoc(collection(db, 'transactions'), { userId: currentUserDocId, bookId, borrowDate: Timestamp.now(), status: 'borrowed' });
                 await updateDoc(bookRef, { stock: book.data().stock - 1 });
-                showToast('Buku berhasil dipinjam');
+                showToast('Buku dipinjam');
                 await refreshUserBooks();
-            }));
+            });
         }
         async function renderUserBorrowed() {
-            const q = query(collection(db,'transactions'), where('userId','==',currentUserDocId), where('status','==','borrowed'));
+            const q = query(collection(db, 'transactions'), where('userId', '==', currentUserDocId), where('status', '==', 'borrowed'));
             const snap = await getDocs(q);
-            let html = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Buku yang Dipinjam</h2>`;
-            if(snap.empty) html += `<p>Tidak ada buku dipinjam.</p>`;
+            let html = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">📘 Buku Dipinjam</h2>`;
+            if (snap.empty) html += `<p>Tidak ada.</p>`;
             else {
                 html += `<table class="w-full border"><thead><tr><th>Judul</th><th>Tgl Pinjam</th><th>Aksi</th></tr></thead><tbody>`;
-                for(const docTrans of snap.docs) {
-                    const trans = docTrans.data();
-                    const book = await getDoc(doc(db,'books',trans.bookId));
-                    const title = book.exists()?book.data().title:'Tidak diketahui';
+                for (const d of snap.docs) {
+                    const trans = d.data();
+                    const book = await getDoc(doc(db, 'books', trans.bookId));
+                    const title = book.exists() ? book.data().title : '-';
                     const date = trans.borrowDate?.toDate().toLocaleDateString();
-                    html += `<tr><td>${title}</td><td>${date}</td><td><button class="returnBookBtn bg-green-600 text-white px-2 py-1 rounded" data-trans="${docTrans.id}" data-book="${trans.bookId}">Kembalikan</button></td></tr>`;
+                    html += `<tr><td class="p-2">${title}</td><td>${date}</td><td><button class="returnUser bg-green-600 text-white px-2 rounded" data-trans="${d.id}" data-book="${trans.bookId}">Kembalikan</button></td></tr>`;
                 }
-                html+=`</tbody></table>`;
+                html += `</tbody>}</table>`;
             }
-            html+=`</div>`;
-            mainContent.innerHTML = html;
-            document.querySelectorAll('.returnBookBtn').forEach(btn => btn.addEventListener('click', async () => {
+            html += `</div>`;
+            document.getElementById('mainContent').innerHTML = html;
+            document.querySelectorAll('.returnUser').forEach(btn => btn.onclick = async () => {
                 const transId = btn.dataset.trans, bookId = btn.dataset.book;
-                await updateDoc(doc(db,'transactions',transId), { status:'returned', returnDate: Timestamp.now() });
-                const bookRef = doc(db,'books',bookId);
+                await updateDoc(doc(db, 'transactions', transId), { status: 'returned', returnDate: Timestamp.now() });
+                const bookRef = doc(db, 'books', bookId);
                 const book = await getDoc(bookRef);
-                if(book.exists()) await updateDoc(bookRef, { stock: book.data().stock + 1 });
-                showToast('Buku dikembalikan');
+                if (book.exists()) await updateDoc(bookRef, { stock: book.data().stock + 1 });
+                showToast('Dikembalikan');
                 await renderUserBorrowed();
-            }));
+            });
         }
         async function renderUserReturn() { await renderUserBorrowed(); }
         function renderDocumentation() {
-            mainContent.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-2xl font-bold">Dokumentasi</h2><p><strong>ERD:</strong> Users, Books, Transactions</p><p><strong>Fitur:</strong> CRUD Buku, Kelola Anggota, Transaksi Pinjam/Kembali, Login Admin/Siswa terpisah.</p><p><strong>Teknologi:</strong> Firebase Auth, Firestore, Tailwind CSS.</p></div>`;
+            document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Dokumentasi</h2><p><strong>ERD:</strong> Users (username, email, name, nis, role), Books, Transactions</p><p><strong>Login:</strong> Menggunakan username + password (bukan email).</p><p><strong>Fitur:</strong> CRUD Buku, Kelola Anggota, Peminjaman/Pengembalian, Pencarian.</p><p><strong>Teknologi:</strong> Firebase Auth (email tersembunyi), Firestore, Tailwind CSS.</p><p><strong>Debugging:</strong> Validasi stok, cegah peminjaman ganda, error handling.</p></div>`;
         }
-        async function renderAdminDashboard() { mainContent.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-2xl font-bold">Dashboard Admin</h2><p>Selamat datang, gunakan menu samping untuk mengelola perpustakaan.</p></div>`; }
+        async function renderAdminDashboard() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-2xl font-bold">Dashboard Admin</h2><p>Selamat datang, gunakan menu samping.</p></div>`; }
 
-        // Fungsi untuk mengatur menu & konten berdasarkan role
-        let mainContent, pageTitle;
-        async function initAppAfterLogin() {
+        // Inisialisasi setelah login
+        async function initApp() {
             renderMainApp();
-            pageTitle = document.getElementById('pageTitle');
-            mainContent = document.getElementById('mainContent');
             const dynamicMenu = document.getElementById('dynamicMenu');
+            const pageTitle = document.getElementById('pageTitle');
             if (currentUserRole === 'admin') {
                 dynamicMenu.innerHTML = `<button data-menu="dashboard" class="menu-btn w-full text-left px-4 py-2 rounded mb-1 hover:bg-indigo-700">Dashboard</button>
-                                        <button data-menu="books" class="menu-btn w-full text-left px-4 py-2 rounded mb-1 hover:bg-indigo-700">Kelola Buku</button>
-                                        <button data-menu="members" class="menu-btn w-full text-left px-4 py-2 rounded mb-1 hover:bg-indigo-700">Kelola Anggota</button>
+                                        <button data-menu="books" class="menu-btn w-full text-left px-4 py-2 rounded mb-1 hover:bg-indigo-700">Buku</button>
+                                        <button data-menu="members" class="menu-btn w-full text-left px-4 py-2 rounded mb-1 hover:bg-indigo-700">Anggota</button>
                                         <button data-menu="transactions" class="menu-btn w-full text-left px-4 py-2 rounded mb-1 hover:bg-indigo-700">Transaksi</button>
                                         <button data-menu="docs" class="menu-btn w-full text-left px-4 py-2 rounded mb-1 hover:bg-indigo-700">Dokumentasi</button>`;
             } else {
@@ -365,66 +550,49 @@
                                         <button data-menu="return-book" class="menu-btn w-full text-left px-4 py-2 rounded mb-1 hover:bg-indigo-700">Pengembalian</button>
                                         <button data-menu="docs" class="menu-btn w-full text-left px-4 py-2 rounded mb-1 hover:bg-indigo-700">Dokumentasi</button>`;
             }
-            document.querySelectorAll('.menu-btn').forEach(btn => btn.addEventListener('click', async (e) => {
-                const menu = btn.getAttribute('data-menu');
-                pageTitle.innerText = {dashboard:'Beranda', books:'Manajemen Buku', members:'Anggota', transactions:'Transaksi', 'my-borrow':'Peminjaman Saya', 'return-book':'Pengembalian', docs:'Dokumentasi'}[menu] || 'Menu';
-                if(menu === 'dashboard') currentUserRole === 'admin' ? await renderAdminDashboard() : await renderUserDashboard();
-                else if(menu === 'books') await renderBooksManagement();
-                else if(menu === 'members') await renderMembersManagement();
-                else if(menu === 'transactions') await renderTransactionsManagement();
-                else if(menu === 'my-borrow') await renderUserBorrowed();
-                else if(menu === 'return-book') await renderUserReturn();
-                else if(menu === 'docs') renderDocumentation();
-            }));
-            // default tampilkan dashboard
+            document.querySelectorAll('.menu-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const menu = btn.getAttribute('data-menu');
+                    const titles = { dashboard: 'Beranda', books: 'Buku', members: 'Anggota', transactions: 'Transaksi', 'my-borrow': 'Peminjaman Saya', 'return-book': 'Pengembalian', docs: 'Dokumentasi' };
+                    pageTitle.innerText = titles[menu] || 'Menu';
+                    if (menu === 'dashboard') currentUserRole === 'admin' ? await renderAdminDashboard() : await renderUserDashboard();
+                    else if (menu === 'books') await renderBooksManagement();
+                    else if (menu === 'members') await renderMembersManagement();
+                    else if (menu === 'transactions') await renderTransactionsManagement();
+                    else if (menu === 'my-borrow') await renderUserBorrowed();
+                    else if (menu === 'return-book') await renderUserReturn();
+                    else if (menu === 'docs') renderDocumentation();
+                });
+            });
             pageTitle.innerText = 'Beranda';
-            if(currentUserRole === 'admin') await renderAdminDashboard();
+            if (currentUserRole === 'admin') await renderAdminDashboard();
             else await renderUserDashboard();
-            document.getElementById('userInfoSpan').innerText = currentUserObj.email;
-            document.getElementById('userRoleSpan').innerText = currentUserRole === 'admin' ? 'Administrator' : 'Siswa';
+            const userData = await getDoc(doc(db, 'users', currentUserDocId));
+            const username = userData.exists() ? userData.data().username : currentUserObj.email;
+            document.getElementById('userInfoSpan').innerText = username;
+            document.getElementById('userRoleSpan').innerText = currentUserRole === 'admin' ? 'Admin' : 'Siswa';
         }
 
         // Auth state listener
         onAuthStateChanged(auth, async (user) => {
-            if(user) {
-                const q = query(collection(db,'users'), where('uid','==',user.uid));
+            if (user) {
+                const q = query(collection(db, 'users'), where('uid', '==', user.uid));
                 const snap = await getDocs(q);
-                if(snap.empty) { await signOut(auth); showToast('Akun tidak valid','error'); return; }
+                if (snap.empty) { await signOut(auth); showToast('Akun tidak terdaftar di database', 'error'); return; }
                 currentUserObj = user;
                 currentUserDocId = snap.docs[0].id;
                 currentUserRole = snap.docs[0].data().role;
                 document.getElementById('loginContainer').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
-                await initAppAfterLogin();
+                await initApp();
             } else {
                 document.getElementById('loginContainer').classList.remove('hidden');
                 document.getElementById('appContainer').classList.add('hidden');
             }
         });
 
-        // Fungsi login & register yang dipanggil dari tombol
-        window.loginAdmin = () => {
-            const email = document.getElementById('adminEmail').value;
-            const pass = document.getElementById('adminPassword').value;
-            signInWithEmailAndPassword(auth, email, pass).catch(e => showToast(e.message, 'error'));
-        };
-        window.loginSiswa = () => {
-            const email = document.getElementById('siswaEmail').value;
-            const pass = document.getElementById('siswaPassword').value;
-            signInWithEmailAndPassword(auth, email, pass).catch(e => showToast(e.message, 'error'));
-        };
-        window.registerSiswa = async () => {
-            const nama = document.getElementById('regNama').value;
-            const nis = document.getElementById('regNis').value;
-            const email = document.getElementById('regEmailSiswa').value;
-            const pass = document.getElementById('regPasswordSiswa').value;
-            if(!nama || !email || !pass) { showToast('Lengkapi data','error'); return; }
-            try {
-                const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-                await addDoc(collection(db,'users'), { uid: userCred.user.uid, email, name: nama, nis, role: 'user' });
-                showToast('Registrasi berhasil, silakan login');
-            } catch(e) { showToast(e.message, 'error'); }
-        };
+        // Tombol reset admin
+        document.getElementById('resetAdminBtn').onclick = () => recreateAdminAccount();
 
         // Tab switching UI
         document.getElementById('tabAdminBtn').onclick = () => {
