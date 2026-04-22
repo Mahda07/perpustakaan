@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>📚 PustakaKita | Perpustakaan Digital Premium</title>
+  <title>📚 Perpustakaan Insan Cemerlang</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
 <!-- Auth Container -->
 <div id="authContainer" class="auth-container">
   <div class="auth-card">
-    <h2>📚 PustakaKita</h2>
+    <h2>📚 Perpustakaan Insan Cemerlang</h2>
     <div class="mode-tabs">
       <div class="mode-tab active" data-mode="login">Login</div>
-      <div class="mode-tab" data-mode="register">Daftar</div>
+      <div class="mode-tab" data-mode="register">Daftar Anggota</div>
     </div>
     <div id="loginForm">
       <input type="text" id="loginUsername" placeholder="Username">
-      <input type="password" id="loginPassword" placeholder="Password">
+      <div class="password-wrapper">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <i class="fas fa-eye toggle-password" data-target="loginPassword"></i>
+      </div>
       <div class="role-select" id="loginRoleSelect">
         <label><input type="radio" name="loginRole" value="admin" checked> Admin</label>
         <label><input type="radio" name="loginRole" value="anggota"> Anggota</label>
@@ -32,13 +34,20 @@
       <input type="text" id="regUsername" placeholder="Username">
       <input type="text" id="regFullname" placeholder="Nama Lengkap">
       <input type="email" id="regEmail" placeholder="Email">
-      <input type="password" id="regPassword" placeholder="Password">
-      <input type="password" id="regConfirmPassword" placeholder="Konfirmasi Password">
-      <div class="role-select">
-        <label><input type="radio" name="regRole" value="admin"> Daftar sebagai Admin</label>
-        <label><input type="radio" name="regRole" value="anggota" checked> Daftar sebagai Anggota</label>
+      <select id="regKelas">
+        <option value="">Pilih Kelas</option>
+        <option>X IPA 1</option><option>X IPA 2</option><option>XI IPA 1</option><option>XI IPA 2</option>
+        <option>XII IPA 1</option><option>XII IPA 2</option><option>X IPS 1</option><option>X IPS 2</option>
+      </select>
+      <div class="password-wrapper">
+        <input type="password" id="regPassword" placeholder="Password">
+        <i class="fas fa-eye toggle-password" data-target="regPassword"></i>
       </div>
-      <button id="registerBtn">Daftar</button>
+      <div class="password-wrapper">
+        <input type="password" id="regConfirmPassword" placeholder="Konfirmasi Password">
+        <i class="fas fa-eye toggle-password" data-target="regConfirmPassword"></i>
+      </div>
+      <button id="registerBtn">Daftar sebagai Anggota</button>
     </div>
     <div id="authError" class="error-msg"></div>
     <div id="authInfo" class="info-msg"></div>
@@ -49,13 +58,11 @@
 <div id="dashboardContainer" style="display: none;">
   <div class="dashboard-container">
     <div class="header">
-      <div class="user-info">
-        <i class="fas fa-user-circle"></i>
-        <span id="userNameDisplay"></span> (<span id="userRoleDisplay"></span>)
-      </div>
+      <div class="user-info"><i class="fas fa-user-circle fa-2x"></i><span id="userNameDisplay"></span> (<span id="userRoleDisplay"></span>) <span id="userKelasDisplay" style="font-size:0.8rem;"></span></div>
       <div>
-        <button class="back-btn" id="backToLoginBtn"><i class="fas fa-arrow-left"></i> Kembali</button>
-        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <button class="btn-header" id="changePasswordBtn"><i class="fas fa-key"></i> Ubah Password</button>
+        <button class="back-btn btn-header" id="backToLoginBtn"><i class="fas fa-arrow-left"></i> Kembali</button>
+        <button class="logout-btn btn-header" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </div>
     </div>
     <div id="menuContainer" class="menu-grid"></div>
@@ -68,13 +75,14 @@
   <div class="modal-content">
     <h3 id="modalTitle">Form</h3>
     <div id="modalBody"></div>
-    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
       <button id="modalSaveBtn" class="btn-primary">Simpan</button>
-      <button id="modalCloseBtn" style="background:#e2e8f0; border:none; padding:0.5rem; border-radius:2rem; flex:1;">Batal</button>
+      <button id="modalCloseBtn" style="background:#ccc; border:none; padding:0.5rem; border-radius:2rem;">Batal</button>
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script type="module" src="main.js"></script>
 </body>
 </html>
