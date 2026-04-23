@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,27 +9,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .tab-active { background-color: #4f46e5; color: white; border-bottom: 2px solid white; }
-        .tab-inactive { background-color: #e2e8f0; color: #4a5568; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .tab-active {
+            background-color: #4f46e5;
+            color: white;
+            border-bottom: 2px solid white;
+        }
+        
+        .tab-inactive {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
     </style>
 </head>
+
 <body class="min-h-screen flex items-center justify-center p-4">
     <div id="toastMsg" class="fixed bottom-5 right-5 text-white px-5 py-3 rounded-lg shadow-lg z-50 hidden transition"></div>
-
+    
     <!-- Login Container -->
     <div id="loginContainer" class="w-full max-w-md">
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
             <div class="bg-indigo-700 text-white py-4 text-center">
-                <h1 class="text-2xl font-bold"><i class="fas fa-book-open mr-2"></i> Pustaka Digital</h1>
-                <p class="text-indigo-200 text-sm">Sistem Peminjaman Buku Online</p>
+                <h1 class="text-2xl font-bold"><i class="fas fa-book-open mr-2"></i> Pustaka Buku  Digital</h1>
+                <p class="text-indigo-200 text-sm">SMK Plus Insan Cemerlang</p>
             </div>
             
             <div class="flex border-b">
                 <button id="tabAdminBtn" class="flex-1 py-3 font-semibold transition tab-active">👑 Admin</button>
                 <button id="tabSiswaBtn" class="flex-1 py-3 font-semibold transition tab-inactive">📚 Siswa</button>
             </div>
-
+            
             <!-- Panel Admin Login (Username + Password) -->
             <div id="panelAdmin" class="p-6 space-y-4">
                 <div class="text-center text-sm text-gray-500">Masuk sebagai Administrator</div>
@@ -41,7 +55,7 @@
                 <p class="text-xs text-center text-gray-400">Default: username = admin , password = admin123</p>
                 <div id="adminError" class="text-red-500 text-xs text-center hidden bg-red-50 p-2 rounded"></div>
             </div>
-
+            
             <!-- Panel Siswa (Login & Register dengan Username) -->
             <div id="panelSiswa" class="p-6 space-y-4 hidden">
                 <div class="flex border-b mb-4">
@@ -65,15 +79,15 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Main App Container (setelah login) -->
     <div id="appContainer" class="hidden min-h-screen w-full"></div>
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { getFirestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, query, where, Timestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
+        
         const firebaseConfig = {
             apiKey: "AIzaSyCfqZD7UZZt-GWmtNhfJyksrv3-8ENRjto",
             authDomain: "insan-cemerlang-d5574.firebaseapp.com",
@@ -83,16 +97,16 @@
             appId: "1:1035937160050:web:6d77d3874c3f78b2811beb",
             measurementId: "G-EVVQ80Q08C"
         };
-
+        
         let app, auth, db;
         try {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
-        } catch(e) {
+        } catch (e) {
             alert("Gagal init Firebase: " + e.message);
         }
-
+        
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toastMsg');
             toast.innerText = msg;
@@ -101,12 +115,12 @@
             toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('hidden'), 4000);
         }
-
+        
         // Helper: Generate email dari username (untuk keperluan Firebase Auth)
         function usernameToEmail(username) {
             return username + "@pustakaapp.com";
         }
-
+        
         // Fungsi login dengan username (admin atau siswa)
         window.loginWithUsername = async (roleType) => {
             let username, password;
@@ -156,7 +170,7 @@
                 }
             }
         };
-
+        
         // Registrasi siswa dengan username
         window.registerSiswa = async () => {
             const username = document.getElementById('regUsername').value.trim();
@@ -204,7 +218,7 @@
                 showToast(msg, "error");
             }
         };
-
+        
         // Membuat ulang akun admin (reset) dengan username 'admin'
         async function recreateAdminAccount() {
             const adminUsername = "admin";
@@ -222,7 +236,7 @@
                 try {
                     const userCred = await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
                     await deleteUser(userCred.user);
-                } catch(e) { /* tidak masalah jika tidak ada */ }
+                } catch (e) { /* tidak masalah jika tidak ada */ }
                 
                 // Buat akun admin baru
                 const userCred = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
@@ -249,7 +263,7 @@
                 document.getElementById('adminError').classList.remove('hidden');
             }
         }
-
+        
         // Membuat admin default jika belum ada (saat pertama kali)
         async function ensureAdminAccount() {
             const adminUsername = "admin";
@@ -303,13 +317,15 @@
                 document.getElementById('adminError').classList.remove('hidden');
             }
         }
-
+        
         // Panggil ensureAdminAccount saat halaman dimuat
         setTimeout(() => ensureAdminAccount(), 1000);
-
+        
         // ======================== BAGIAN UTAMA APLIKASI (CRUD, TRANSAKSI, DLL) ========================
-        let currentUserObj = null, currentUserRole = null, currentUserDocId = null;
-
+        let currentUserObj = null,
+            currentUserRole = null,
+            currentUserDocId = null;
+        
         function renderMainApp() {
             const appHtml = `
             <div class="min-h-screen flex flex-col md:flex-row">
@@ -328,9 +344,10 @@
                 </main>
             </div>`;
             document.getElementById('appContainer').innerHTML = appHtml;
-            window.logout = async () => { await signOut(auth); location.reload(); };
+            window.logout = async () => { await signOut(auth);
+                location.reload(); };
         }
-
+        
         // Fungsi CRUD Buku, Anggota, Transaksi (sama seperti sebelumnya, tapi disesuaikan)
         async function loadBooks(search = '') {
             const snapshot = await getDocs(collection(db, 'books'));
@@ -338,7 +355,7 @@
             if (search) return books.filter(b => b.title?.toLowerCase().includes(search.toLowerCase()) || b.author?.toLowerCase().includes(search.toLowerCase()));
             return books;
         }
-
+        
         async function renderBooksManagement() {
             const main = document.getElementById('mainContent');
             main.innerHTML = `<div class="bg-white rounded-xl shadow p-6"><div class="flex justify-between"><h2 class="text-xl font-bold">📚 Buku</h2><button id="addBookBtn" class="bg-indigo-600 text-white px-3 py-1 rounded">+ Buku</button></div><input id="searchBook" placeholder="Cari..." class="border p-2 my-2 w-full"><div id="booksList"></div></div>`;
@@ -357,7 +374,8 @@
             html += `</tbody></tr>`;
             container.innerHTML = html;
             document.querySelectorAll('.editBook').forEach(btn => btn.onclick = () => showBookForm(btn.dataset.id));
-            document.querySelectorAll('.deleteBook').forEach(btn => btn.onclick = async () => { if(confirm('Hapus?')) await deleteDoc(doc(db,'books',btn.dataset.id)); await refreshBooksTable(); });
+            document.querySelectorAll('.deleteBook').forEach(btn => btn.onclick = async () => { if (confirm('Hapus?')) await deleteDoc(doc(db, 'books', btn.dataset.id));
+                await refreshBooksTable(); });
         }
         async function showBookForm(id = null) {
             let data = { title: '', author: '', year: '', stock: 0 };
@@ -374,7 +392,7 @@
                 showToast('Buku tersimpan');
             };
         }
-
+        
         async function renderMembersManagement() {
             const main = document.getElementById('mainContent');
             main.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Anggota</h2><button id="addMemberBtn" class="bg-indigo-600 text-white px-3 py-1 rounded my-2">Tambah Anggota</button><div id="membersList"></div></div>`;
@@ -391,7 +409,8 @@
             members.forEach(m => { html += `<tr><td class="p-2">${m.username}</td><td>${m.name}</td><td>${m.nis}</td><td><button class="delMember bg-red-500 px-2 rounded text-white" data-id="${m.id}">Hapus</button></td></tr>`; });
             html += `</tbody></table>`;
             container.innerHTML = html;
-            document.querySelectorAll('.delMember').forEach(btn => btn.onclick = async () => { if(confirm('Hapus anggota?')) await deleteDoc(doc(db,'users',btn.dataset.id)); await refreshMembers(); });
+            document.querySelectorAll('.delMember').forEach(btn => btn.onclick = async () => { if (confirm('Hapus anggota?')) await deleteDoc(doc(db, 'users', btn.dataset.id));
+                await refreshMembers(); });
         }
         async function showMemberForm() {
             const html = `<div id="modal" class="fixed inset-0 bg-black/50 flex justify-center items-center"><div class="bg-white p-5 rounded w-96"><h3>Tambah Anggota</h3><input id="username" placeholder="Username" class="border p-2 w-full my-1"><input id="name" placeholder="Nama Lengkap" class="border p-2 w-full my-1"><input id="nis" placeholder="NIS" class="border p-2 w-full my-1"><input id="pass" type="password" placeholder="Password" class="border p-2 w-full my-1"><div class="flex justify-end gap-2 mt-3"><button id="cancelModal" class="bg-gray-400 px-3 py-1 rounded">Batal</button><button id="saveMember" class="bg-indigo-600 text-white px-3 py-1 rounded">Simpan</button></div></div></div>`;
@@ -413,7 +432,7 @@
                 } catch (e) { showToast(e.message, 'error'); }
             };
         }
-
+        
         async function renderTransactionsManagement() {
             const main = document.getElementById('mainContent');
             main.innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Transaksi</h2><button id="newLoanBtn" class="bg-green-600 text-white px-3 py-1 rounded my-2">+ Pinjam Buku</button><div id="transList"></div></div>`;
@@ -456,7 +475,8 @@
             document.body.insertAdjacentHTML('beforeend', html);
             document.getElementById('cancelModal').onclick = () => document.getElementById('modal').remove();
             document.getElementById('saveLoan').onclick = async () => {
-                const userId = document.getElementById('userId').value, bookId = document.getElementById('bookId').value;
+                const userId = document.getElementById('userId').value,
+                    bookId = document.getElementById('bookId').value;
                 if (!userId || !bookId) { showToast('Lengkapi data', 'error'); return; }
                 const bookRef = doc(db, 'books', bookId);
                 const book = await getDoc(bookRef);
@@ -468,7 +488,7 @@
                 await refreshTransactions();
             };
         }
-
+        
         // USER SIDE
         async function renderUserDashboard() {
             const main = document.getElementById('mainContent');
@@ -518,7 +538,8 @@
             html += `</div>`;
             document.getElementById('mainContent').innerHTML = html;
             document.querySelectorAll('.returnUser').forEach(btn => btn.onclick = async () => {
-                const transId = btn.dataset.trans, bookId = btn.dataset.book;
+                const transId = btn.dataset.trans,
+                    bookId = btn.dataset.book;
                 await updateDoc(doc(db, 'transactions', transId), { status: 'returned', returnDate: Timestamp.now() });
                 const bookRef = doc(db, 'books', bookId);
                 const book = await getDoc(bookRef);
@@ -528,11 +549,12 @@
             });
         }
         async function renderUserReturn() { await renderUserBorrowed(); }
+        
         function renderDocumentation() {
             document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-xl font-bold">Dokumentasi</h2><p><strong>ERD:</strong> Users (username, email, name, nis, role), Books, Transactions</p><p><strong>Login:</strong> Menggunakan username + password (bukan email).</p><p><strong>Fitur:</strong> CRUD Buku, Kelola Anggota, Peminjaman/Pengembalian, Pencarian.</p><p><strong>Teknologi:</strong> Firebase Auth (email tersembunyi), Firestore, Tailwind CSS.</p><p><strong>Debugging:</strong> Validasi stok, cegah peminjaman ganda, error handling.</p></div>`;
         }
         async function renderAdminDashboard() { document.getElementById('mainContent').innerHTML = `<div class="bg-white p-6 rounded shadow"><h2 class="text-2xl font-bold">Dashboard Admin</h2><p>Selamat datang, gunakan menu samping.</p></div>`; }
-
+        
         // Inisialisasi setelah login
         async function initApp() {
             renderMainApp();
@@ -572,13 +594,14 @@
             document.getElementById('userInfoSpan').innerText = username;
             document.getElementById('userRoleSpan').innerText = currentUserRole === 'admin' ? 'Admin' : 'Siswa';
         }
-
+        
         // Auth state listener
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const q = query(collection(db, 'users'), where('uid', '==', user.uid));
                 const snap = await getDocs(q);
-                if (snap.empty) { await signOut(auth); showToast('Akun tidak terdaftar di database', 'error'); return; }
+                if (snap.empty) { await signOut(auth);
+                    showToast('Akun tidak terdaftar di database', 'error'); return; }
                 currentUserObj = user;
                 currentUserDocId = snap.docs[0].id;
                 currentUserRole = snap.docs[0].data().role;
@@ -590,35 +613,44 @@
                 document.getElementById('appContainer').classList.add('hidden');
             }
         });
-
+        
         // Tombol reset admin
         document.getElementById('resetAdminBtn').onclick = () => recreateAdminAccount();
-
+        
         // Tab switching UI
         document.getElementById('tabAdminBtn').onclick = () => {
             document.getElementById('panelAdmin').classList.remove('hidden');
             document.getElementById('panelSiswa').classList.add('hidden');
-            document.getElementById('tabAdminBtn').classList.add('tab-active'); document.getElementById('tabAdminBtn').classList.remove('tab-inactive');
-            document.getElementById('tabSiswaBtn').classList.add('tab-inactive'); document.getElementById('tabSiswaBtn').classList.remove('tab-active');
+            document.getElementById('tabAdminBtn').classList.add('tab-active');
+            document.getElementById('tabAdminBtn').classList.remove('tab-inactive');
+            document.getElementById('tabSiswaBtn').classList.add('tab-inactive');
+            document.getElementById('tabSiswaBtn').classList.remove('tab-active');
         };
         document.getElementById('tabSiswaBtn').onclick = () => {
             document.getElementById('panelAdmin').classList.add('hidden');
             document.getElementById('panelSiswa').classList.remove('hidden');
-            document.getElementById('tabSiswaBtn').classList.add('tab-active'); document.getElementById('tabSiswaBtn').classList.remove('tab-inactive');
-            document.getElementById('tabAdminBtn').classList.add('tab-inactive'); document.getElementById('tabAdminBtn').classList.remove('tab-active');
+            document.getElementById('tabSiswaBtn').classList.add('tab-active');
+            document.getElementById('tabSiswaBtn').classList.remove('tab-inactive');
+            document.getElementById('tabAdminBtn').classList.add('tab-inactive');
+            document.getElementById('tabAdminBtn').classList.remove('tab-active');
         };
         document.getElementById('siswaLoginTab').onclick = () => {
             document.getElementById('siswaLoginForm').classList.remove('hidden');
             document.getElementById('siswaRegisterForm').classList.add('hidden');
-            document.getElementById('siswaLoginTab').classList.add('border-indigo-600','text-indigo-600'); document.getElementById('siswaLoginTab').classList.remove('text-gray-500','border-transparent');
-            document.getElementById('siswaRegisterTab').classList.add('text-gray-500','border-transparent'); document.getElementById('siswaRegisterTab').classList.remove('border-indigo-600','text-indigo-600');
+            document.getElementById('siswaLoginTab').classList.add('border-indigo-600', 'text-indigo-600');
+            document.getElementById('siswaLoginTab').classList.remove('text-gray-500', 'border-transparent');
+            document.getElementById('siswaRegisterTab').classList.add('text-gray-500', 'border-transparent');
+            document.getElementById('siswaRegisterTab').classList.remove('border-indigo-600', 'text-indigo-600');
         };
         document.getElementById('siswaRegisterTab').onclick = () => {
             document.getElementById('siswaLoginForm').classList.add('hidden');
             document.getElementById('siswaRegisterForm').classList.remove('hidden');
-            document.getElementById('siswaRegisterTab').classList.add('border-indigo-600','text-indigo-600'); document.getElementById('siswaRegisterTab').classList.remove('text-gray-500','border-transparent');
-            document.getElementById('siswaLoginTab').classList.add('text-gray-500','border-transparent'); document.getElementById('siswaLoginTab').classList.remove('border-indigo-600','text-indigo-600');
+            document.getElementById('siswaRegisterTab').classList.add('border-indigo-600', 'text-indigo-600');
+            document.getElementById('siswaRegisterTab').classList.remove('text-gray-500', 'border-transparent');
+            document.getElementById('siswaLoginTab').classList.add('text-gray-500', 'border-transparent');
+            document.getElementById('siswaLoginTab').classList.remove('border-indigo-600', 'text-indigo-600');
         };
     </script>
 </body>
+
 </html>
